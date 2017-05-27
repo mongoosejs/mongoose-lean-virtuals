@@ -25,7 +25,7 @@ function attachVirtuals(schema, virtuals) {
       if (Array.isArray(this._mongooseOptions.lean.virtuals)) {
         toApply = this._mongooseOptions.lean.virtuals;
       }
-      var numVirtuals = virtuals.length;
+      var numVirtuals = toApply.length;
       if (Array.isArray(res)) {
         var len = res.length;
         for (var i = 0; i < len; ++i) {
@@ -39,7 +39,14 @@ function attachVirtuals(schema, virtuals) {
 
   function attachVirtualsToDoc(doc, virtuals, numVirtuals) {
     for (var i = 0; i < numVirtuals; ++i) {
-      doc[virtuals[i]] = schema.virtuals[virtuals[i]].applyGetters(undefined, doc);
+      var virtual = virtuals[i];
+      var sp = virtual.split('.');
+      var cur = doc;
+      for (var j = 0; j < sp.length - 1; ++j) {
+        cur[sp[j]] = sp[j] in cur ? cur[sp[j]] : {};
+        cur = cur[sp[j]];
+      }
+      cur[sp[sp.length - 1]] =schema.virtuals[virtual].applyGetters(void 0, doc);
     }
   }
 }
