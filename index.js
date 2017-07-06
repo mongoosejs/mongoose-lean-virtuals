@@ -46,7 +46,7 @@ function attachVirtuals(schema, virtuals) {
         cur[sp[j]] = sp[j] in cur ? cur[sp[j]] : {};
         cur = cur[sp[j]];
       }
-      cur[sp[sp.length - 1]] =schema.virtuals[virtual].applyGetters(void 0, doc);
+      cur[sp[sp.length - 1]] = schema.virtuals[virtual].applyGetters(void 0, doc);
     }
   }
 }
