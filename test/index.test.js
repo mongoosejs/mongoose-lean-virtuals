@@ -22,6 +22,7 @@ describe('tests', function() {
       Model.findOne({}).lean({ virtuals: true }).exec(function(error, res) {
         assert.ifError(error);
         assert.ok(res);
+        assert.equal(res.id, res._id.toHexString());
         assert.equal(res.name, 'Val');
         assert.equal(res.lowercaseName, 'val');
         done();

@@ -8,7 +8,7 @@ describe('examples', function() {
   it('attaches virtuals to result of find, findOne, and findOneAndUpdate if lean', function() {
     const schema = new mongoose.Schema({
       name: String
-    }, { id: false });
+    });
 
     schema.virtual('lowercase').get(function() {
       return this.name.toLowerCase();
@@ -30,6 +30,12 @@ describe('examples', function() {
         assert.equal(findRes[0].lowercase, 'val');
         assert.equal(findOneRes.lowercase, 'val');
         assert.equal(findOneAndUpdateRes.lowercase, 'val');
+
+        // Mongoose has an `id` virtual by default that gets the `_id` as a
+        // string.
+        assert.equal(findRes[0].id, findRes[0]._id.toString());
+        assert.equal(findOneRes.id, findOneRes._id.toString());
+        assert.equal(findOneAndUpdateRes.id, findOneAndUpdateRes._id.toString());
       });
   });
 
