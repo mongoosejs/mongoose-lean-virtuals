@@ -17,7 +17,7 @@ const mongooseLeanVirtuals = require('mongoose-lean-virtuals');
 
     const schema = new mongoose.Schema({
       name: String
-    }, { id: false });
+    });
 
     schema.virtual('lowercase').get(function() {
       return this.name.toLowerCase();
@@ -39,6 +39,12 @@ const mongooseLeanVirtuals = require('mongoose-lean-virtuals');
         assert.equal(findRes[0].lowercase, 'val');
         assert.equal(findOneRes.lowercase, 'val');
         assert.equal(findOneAndUpdateRes.lowercase, 'val');
+
+        // Mongoose has an `id` virtual by default that gets the `_id` as a
+        // string.
+        assert.equal(findRes[0].id, findRes[0]._id.toString());
+        assert.equal(findOneRes.id, findOneRes._id.toString());
+        assert.equal(findOneAndUpdateRes.id, findOneAndUpdateRes._id.toString());
       });
   
 ```
