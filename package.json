@@ -4,7 +4,7 @@
   "description": "Attach virtuals to the results of mongoose queries when using `.lean()`",
   "main": "index.js",
   "scripts": {
-    "docs": "node ./docs",
+    "docs": "acquit-markdown -r acquit-ignore -p './test/examples.test.js' -h './HEADER.md' > README.md",
     "test": "mocha ./test/*.js",
     "test-integration": "mocha ./test/integration.js",
     "test-travis": "istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec ./test/*"
@@ -22,7 +22,7 @@
   "devDependencies": {
     "acquit": "0.4.1",
     "acquit-ignore": "0.0.3",
-    "acquit-markdown": "0.0.5",
+    "acquit-markdown": "0.0.8",
     "istanbul": "0.4.5",
     "mocha": "3.2.0",
     "mongoose": "~4.11"
