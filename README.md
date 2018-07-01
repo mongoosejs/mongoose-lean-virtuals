@@ -11,7 +11,7 @@ const mongooseLeanVirtuals = require('mongoose-lean-virtuals');
 
 # examples
 
-## It attaches virtuals to result of find, findOne, and findOneAndUpdate if lean
+## It attaches virtuals to result of find, findOne, findById, findByIdAndUpdate, and findOneAndUpdate if lean
 
 ```javascript
 
