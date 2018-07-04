@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const mongooseLeanVirtuals = require('../');
 
 describe('examples', function() {
-  it('attaches virtuals to result of find, findOne, and findOneAndUpdate if lean', function() {
+  it('attaches virtuals to result of find, findOne, findById, findByIdAndUpdate, and findOneAndUpdate if lean', function() {
     const schema = new mongoose.Schema({
       name: String
     });
