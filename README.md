@@ -4,7 +4,7 @@ Attach virtuals to the results of mongoose queries when using [`.lean()`](https:
 
 [Read the docs here](http://plugins.mongoosejs.io/plugins/lean-virtuals).
 
-## Usage
+# Usage
 
 ```javascript
 const mongooseLeanVirtuals = require('mongoose-lean-virtuals');
