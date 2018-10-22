@@ -9,3 +9,7 @@ before(function(done) {
 
   mongoose.connection.dropDatabase(done);
 });
+
+after(function() {
+  return mongoose.disconnect();
+});
