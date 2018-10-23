@@ -1,6 +1,7 @@
 'use strict';
 
 const assert = require('assert');
+const co = require('co');
 const mongoose = require('mongoose');
 const mongooseLeanVirtuals = require('../');
 
@@ -58,6 +59,26 @@ describe('tests', function() {
         assert.equal(res.nested.test, 'val');
         assert.equal(res.nested.test2, 'VAL');
         done();
+      });
+    });
+  });
+
+  it('with cursor', function() {
+    const schema = new mongoose.Schema({ name: String });
+    schema.virtual('lower').get(function() {
+      return this.name.toLowerCase();
+    });
+    schema.plugin(mongooseLeanVirtuals);
+
+    const Model = mongoose.model('t3', schema);
+
+    return co(function*() {
+      yield Model.create({ name: 'FOO' });
+
+      yield Model.find().lean({ virtuals: true }).cursor().eachAsync(doc => {
+        assert.ok(!doc.$__);
+        assert.equal(doc.name, 'FOO');
+        assert.equal(doc.lower, 'foo');
       });
     });
   });

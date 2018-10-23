@@ -1,13 +1,20 @@
 'use strict';
 
 module.exports = function mongooseLeanVirtuals(schema) {
-  schema.post('find', attachVirtuals(schema));
-  schema.post('findOne', attachVirtuals(schema));
-  schema.post('findOneAndUpdate', attachVirtuals(schema));
+  const fn = attachVirtuals(schema);
+  schema.pre('find', function() {
+    this.options.transform = function(res) {
+      return fn.call(this.query, res);
+    };
+  });
+
+  schema.post('find', fn);
+  schema.post('findOne', fn);
+  schema.post('findOneAndUpdate', fn);
 };
 
 function attachVirtuals(schema) {
-  return function(res) {
+  return function _attachVirtuals(res) {
     var virtuals = [];
     var keys = Object.keys(schema.virtuals);
     for (var i = 0; i < keys.length; ++i) {
