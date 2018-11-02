@@ -41,6 +41,8 @@ function attachVirtuals(schema) {
       } else {
         attachVirtualsToDoc(res, toApply, numVirtuals);
       }
+    } else {
+      return res
     }
   };
 
