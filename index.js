@@ -36,10 +36,10 @@ function attachVirtuals(schema) {
       if (Array.isArray(res)) {
         var len = res.length;
         for (var i = 0; i < len; ++i) {
-          attachVirtualsToDoc(res[i], toApply, numVirtuals);
+          return attachVirtualsToDoc(res[i], toApply, numVirtuals);
         }
       } else {
-        attachVirtualsToDoc(res, toApply, numVirtuals);
+        return attachVirtualsToDoc(res, toApply, numVirtuals);
       }
     } else {
       return res
@@ -57,5 +57,6 @@ function attachVirtuals(schema) {
       }
       cur[sp[sp.length - 1]] = schema.virtuals[virtual].applyGetters(void 0, doc);
     }
+    return cur;
   }
 }
