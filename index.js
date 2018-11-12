@@ -24,7 +24,7 @@ function attachVirtuals(schema) {
     }
 
     if (res == null) {
-      return
+      return;
     }
 
     if (this._mongooseOptions.lean && this._mongooseOptions.lean.virtuals) {
@@ -36,13 +36,14 @@ function attachVirtuals(schema) {
       if (Array.isArray(res)) {
         var len = res.length;
         for (var i = 0; i < len; ++i) {
-          return attachVirtualsToDoc(res[i], toApply, numVirtuals);
+          attachVirtualsToDoc(res[i], toApply, numVirtuals);
         }
+        return res;
       } else {
         return attachVirtualsToDoc(res, toApply, numVirtuals);
       }
     } else {
-      return res
+      return res;
     }
   };
 
