@@ -1,3 +1,7 @@
+0.3.4 / 2018-11-13
+==================
+ * fix: attach all virtuals as opposed to just one #14 [artemkobets](https://github.com/artemkobets)
+
 0.3.3 / 2018-11-09
 ==================
  * fix: fix one more issue with `eachAsync()` #12 [nico29](https://github.com/nico29)
