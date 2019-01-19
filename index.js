@@ -18,7 +18,7 @@ function attachVirtuals(schema) {
     var virtuals = [];
     var keys = Object.keys(schema.virtuals);
     for (var i = 0; i < keys.length; ++i) {
-      if (!schema.virtuals[keys[i]].ref) {
+      if (!schema.virtuals[keys[i]].ref && (!schema.virtuals[keys[i]].options || !schema.virtuals[keys[i]].options.ref)) {
         virtuals.push(keys[i]);
       }
     }
