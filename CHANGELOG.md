@@ -1,3 +1,7 @@
+0.3.5 / 2019-03-11
+==================
+ * fix: support `ref` in virtual options #19 [linusbrolin](https://github.com/linusbrolin)
+
 0.3.4 / 2018-11-13
 ==================
  * fix: attach all virtuals as opposed to just one #14 [artemkobets](https://github.com/artemkobets)
