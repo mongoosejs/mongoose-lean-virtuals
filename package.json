@@ -19,6 +19,9 @@
     "virtuals",
     "mongodb"
   ],
+  "dependencies": {
+    "mpath": "0.5.x"
+  },
   "devDependencies": {
     "acquit": "1.x",
     "acquit-ignore": "0.1.0",

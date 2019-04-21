@@ -82,4 +82,32 @@ describe('tests', function() {
       });
     });
   });
+
+  it('with nested schemas (gh-20)', function() {
+    const schema = new mongoose.Schema({ name: String });
+    schema.virtual('lower').get(function() {
+      return this.name.toLowerCase();
+    });
+
+    const parentSchema = new mongoose.Schema({
+      nested: schema,
+      arr: [schema]
+    });
+    parentSchema.plugin(mongooseLeanVirtuals);
+
+    const Model = mongoose.model('gh20', parentSchema);
+
+    return co(function*() {
+      yield Model.create({
+        nested: { name: 'FOO' },
+        arr: [{ name: 'BAR' }, { name: 'BAZ' }]
+      });
+
+      const doc = yield Model.findOne().lean({ virtuals: true });
+
+      assert.equal(doc.nested.lower, 'foo');
+      assert.equal(doc.arr[0].lower, 'bar');
+      assert.equal(doc.arr[1].lower, 'baz');
+    });
+  });
 });
