@@ -1,3 +1,7 @@
+0.4.0 / 2019-04-21
+==================
+ * feat: support virtuals in nested schemas #20
+
 0.3.5 / 2019-03-11
 ==================
  * fix: support `ref` in virtual options #19 [linusbrolin](https://github.com/linusbrolin)
