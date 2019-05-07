@@ -9,83 +9,94 @@ let baseDocId;
 let baseModel;
 let baseObj;
 let baseSchema;
-before(async () => {
-  mongoose.Promise = global.Promise;
-  await mongoose.connect('mongodb://localhost:27017/mongooseLeanVirtuals', {
-    useFindAndModify: false,
-    useNewUrlParser: true,
-  });
-  await mongoose.connection.dropDatabase();
 
-  baseSchema = new mongoose.Schema({
-    name: String,
-    nested: {
-      test: String
-    }
-  });
-  baseSchema.virtual('lowerCaseName').get(function() {
-    return this.name.toLowerCase();
-  });
-  baseSchema.virtual('nested.upperCaseTest').get(function() {
-    return this.nested.test.toUpperCase();
-  });
-  baseSchema.plugin(mongooseLeanVirtuals);
+before(function() {
+  return co(function*() {
+    yield mongoose.connect('mongodb://localhost:27017/mongooseLeanVirtuals', {
+      useFindAndModify: false,
+      useNewUrlParser: true,
+    });
+    yield mongoose.connection.dropDatabase();
 
-  baseModel = mongoose.model('baseModel', baseSchema);
+    baseSchema = new mongoose.Schema({
+      name: String,
+      nested: {
+        test: String
+      }
+    });
+    baseSchema.virtual('lowerCaseName').get(function() {
+      return this.name.toLowerCase();
+    });
+    baseSchema.virtual('nested.upperCaseTest').get(function() {
+      return this.nested.test.toUpperCase();
+    });
+    baseSchema.plugin(mongooseLeanVirtuals);
 
-  baseObj = {
-    name: 'Val',
-    nested: {
-      test: 'Foo',
-    }
-  };
-  const baseDoc = await baseModel.create(baseObj);
-  baseDocId = baseDoc._id;
+    baseModel = mongoose.model('baseModel', baseSchema);
+
+    baseObj = {
+      name: 'Val',
+      nested: {
+        test: 'Foo',
+      }
+    };
+    const baseDoc = yield baseModel.create(baseObj);
+    baseDocId = baseDoc._id;
+  });
 });
 
 after(function() {
   return mongoose.disconnect();
 });
 
-const defaultLeanOpts = { virtuals: true };
+const defaultLeanOptions = { virtuals: true };
 const supportedOps = {
-  'find': async function(model, docId, leanOptions = defaultLeanOpts) {
-    return (await model.find({}).lean(leanOptions).exec())[0];
+  'find': function(model, docId, leanOptions) {
+    leanOptions = leanOptions || defaultLeanOptions;
+    return model.find({}).lean(leanOptions).exec().then(res => res[0]);
   },
-  'findById': async function(model, docId, leanOptions = defaultLeanOpts) {
-    return await model.findById(docId).lean(leanOptions).exec();
+  'findById': function(model, docId, leanOptions) {
+    leanOptions = leanOptions || defaultLeanOptions;
+    return model.findById(docId).lean(leanOptions).exec();
   },
-  'findByIdAndUpdate': async function(model, docId, leanOptions = defaultLeanOpts) {
-    return await model.findByIdAndUpdate(docId, {}).lean(leanOptions).exec();
+  'findByIdAndUpdate': function(model, docId, leanOptions) {
+    leanOptions = leanOptions || defaultLeanOptions;
+    return model.findByIdAndUpdate(docId, {}).lean(leanOptions).exec();
   },
-  'findOne': async function(model, docId, leanOptions = defaultLeanOpts) {
-    return await model.findOne({}).lean(leanOptions).exec();
+  'findOne': function(model, docId, leanOptions) {
+    leanOptions = leanOptions || defaultLeanOptions;
+    return model.findOne({}).lean(leanOptions).exec();
   },
-  'findOneAndUpdate': async function(model, docId, leanOptions = defaultLeanOpts) {
-    return await model.findOneAndUpdate({}, {}).lean(leanOptions).exec();
+  'findOneAndUpdate': function(model, docId, leanOptions) {
+    leanOptions = leanOptions || defaultLeanOptions;
+    return model.findOneAndUpdate({}, {}).lean(leanOptions).exec();
   },
 };
 const supportedOpsKeys = Object.keys(supportedOps);
 
 describe('Top level leaned virtuals work ', () => {
   supportedOpsKeys.forEach((key) => {
-    it(`with ${key}`, async () => {
-      const doc = await supportedOps[key](baseModel, baseDocId);
-      assert.ok(doc);
-      assert.equal(doc.id, doc._id.toHexString());
-      assert.equal(doc.name, 'Val');
-      assert.equal(doc.lowerCaseName, 'val');
+    it(`with ${key}`, function() {
+      return co(function*() {
+        const doc = yield supportedOps[key](baseModel, baseDocId);
+        assert.ok(doc);
+        assert.equal(doc.id, doc._id.toHexString());
+        assert.equal(doc.name, 'Val');
+        assert.equal(doc.lowerCaseName, 'val');
+      });
     });
   });
 });
 
 describe('Nested virtuals work', () => {
   supportedOpsKeys.forEach((key) => {
-    it(`with ${key}`, async () => {
-      const doc = await supportedOps[key](baseModel, baseDocId);
-      assert.ok(doc);
-      assert.equal(doc.nested.test, 'Foo');
-      assert.equal(doc.nested.upperCaseTest, 'FOO');
+    it(`with ${key}`, function() {
+      return co(function*() {
+        const doc = yield supportedOps[key](baseModel, baseDocId);
+        assert.ok(doc);
+        assert.equal(doc.nested.test, 'Foo');
+        assert.equal(doc.nested.upperCaseTest, 'FOO');
+      });
     });
   });
 });
@@ -105,34 +116,38 @@ describe.skip('Nested schema virtuals work', () => {
   let parentDocId;
   let parentModel;
 
-  before(async () => {
-    const parentSchema = new mongoose.Schema({
-      nested: baseSchema,
-      arr: [baseSchema]
-    });
-    parentSchema.plugin(mongooseLeanVirtuals);
-    parentModel = mongoose.model('parentModel', parentSchema);
+  before(function() {
+    return co(function*() {
+      const parentSchema = new mongoose.Schema({
+        nested: baseSchema,
+        arr: [baseSchema]
+      });
+      parentSchema.plugin(mongooseLeanVirtuals);
+      parentModel = mongoose.model('parentModel', parentSchema);
 
-    const parentDoc = await parentModel.create({
-      nested: baseObj,
-      arr: [baseObj, baseObj],
+      const parentDoc = yield parentModel.create({
+        nested: baseObj,
+        arr: [baseObj, baseObj],
+      });
+      parentDocId = parentDoc._id;
     });
-    parentDocId = parentDoc._id;
   });
 
   supportedOpsKeys.forEach((key) => {
-    it(`with ${key}`, async () => {
-      const doc = await supportedOps[key](parentModel, parentDocId);
-      assert.ok(doc);
-      assert.equal(doc.nested.name, 'Val');
-      assert.equal(doc.nested.lowerCaseName, 'val');
-      assert.equal(doc.nested.nested.test, 'Foo');
-      assert.equal(doc.nested.nested.upperCaseTest, 'FOO');
-      doc.arr.forEach((doc) => {
-        assert.equal(doc.name, 'Val');
-        assert.equal(doc.lowerCaseName, 'val');
-        assert.equal(doc.nested.test, 'Foo');
-        assert.equal(doc.nested.upperCaseTest, 'FOO');
+    it(`with ${key}`, function() {
+      return co(function*() {
+        const doc = yield supportedOps[key](parentModel, parentDocId);
+        assert.ok(doc);
+        assert.equal(doc.nested.name, 'Val');
+        assert.equal(doc.nested.lowerCaseName, 'val');
+        assert.equal(doc.nested.nested.test, 'Foo');
+        assert.equal(doc.nested.nested.upperCaseTest, 'FOO');
+        doc.arr.forEach((doc) => {
+          assert.equal(doc.name, 'Val');
+          assert.equal(doc.lowerCaseName, 'val');
+          assert.equal(doc.nested.test, 'Foo');
+          assert.equal(doc.nested.upperCaseTest, 'FOO');
+        });
       });
     });
   });
