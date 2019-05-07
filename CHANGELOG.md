@@ -1,3 +1,7 @@
+0.4.1 / 2019-05-07
+==================
+ * fix: support Mongoose 5.x cursors #21
+
 0.4.0 / 2019-04-21
 ==================
  * feat: support virtuals in nested schemas #20
