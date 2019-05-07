@@ -6,7 +6,8 @@ module.exports = function mongooseLeanVirtuals(schema) {
   const fn = attachVirtualsMiddleware(schema);
   schema.pre('find', function() {
     this.options.transform = function(res) {
-      return fn.call(this.query, res);
+      fn.call(this.query, res);
+      return res;
     };
   });
 

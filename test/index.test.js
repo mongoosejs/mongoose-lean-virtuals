@@ -74,8 +74,8 @@ const supportedOps = {
 };
 const supportedOpsKeys = Object.keys(supportedOps);
 
-describe('Top level leaned virtuals work ', () => {
-  supportedOpsKeys.forEach((key) => {
+describe('Top level leaned virtuals work', function() {
+  supportedOpsKeys.forEach(key => {
     it(`with ${key}`, function() {
       return co(function*() {
         const doc = yield supportedOps[key](baseModel, baseDocId);
@@ -88,8 +88,28 @@ describe('Top level leaned virtuals work ', () => {
   });
 });
 
-describe('Nested virtuals work', () => {
-  supportedOpsKeys.forEach((key) => {
+describe('Cursor', function() {
+  it('works (gh-21)', function() {
+    return co(function*() {
+      const schema = new mongoose.Schema({ email: String });
+      schema.virtual('lower').get(function() {
+        return this.email.toLowerCase();
+      });
+      schema.plugin(mongooseLeanVirtuals);
+
+      const Model = mongoose.model('gh21', schema);
+      yield Model.create({ email: 'FOO@BAR' });
+
+      const cursor = Model.find().lean({ virtuals: true }).cursor();
+      const doc = yield cursor.next();
+      assert.equal(doc.email, 'FOO@BAR');
+      assert.equal(doc.lower, 'foo@bar');
+    });
+  });
+});
+
+describe('Nested virtuals work', function() {
+  supportedOpsKeys.forEach(key => {
     it(`with ${key}`, function() {
       return co(function*() {
         const doc = yield supportedOps[key](baseModel, baseDocId);
@@ -101,8 +121,8 @@ describe('Nested virtuals work', () => {
   });
 });
 
-describe('Virtuals work with cursor', () => {
-  it('with find', () => {
+describe('Virtuals work with cursor', function() {
+  it('with find', function() {
     return baseModel.find().lean({ virtuals: true }).cursor().eachAsync(doc => {
       assert.ok(!doc.$__);
       assert.equal(doc.name, 'Val');
@@ -112,7 +132,7 @@ describe('Virtuals work with cursor', () => {
 });
 
 // Skipping for now since this doesn't work.
-describe.skip('Nested schema virtuals work', () => {
+describe.skip('Nested schema virtuals work', function() {
   let parentDocId;
   let parentModel;
 
@@ -133,7 +153,7 @@ describe.skip('Nested schema virtuals work', () => {
     });
   });
 
-  supportedOpsKeys.forEach((key) => {
+  supportedOpsKeys.forEach(key => {
     it(`with ${key}`, function() {
       return co(function*() {
         const doc = yield supportedOps[key](parentModel, parentDocId);
