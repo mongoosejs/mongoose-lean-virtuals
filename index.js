@@ -5,10 +5,17 @@ const mpath = require('mpath');
 module.exports = function mongooseLeanVirtuals(schema) {
   const fn = attachVirtualsMiddleware(schema);
   schema.pre('find', function() {
-    this.options.transform = function(res) {
-      fn.call(this.query, res);
-      return res;
-    };
+    if (typeof this.map === 'function') {
+      this.map((res) => {
+        fn.call(this, res);
+        return res;
+      });
+    } else {
+      this.options.transform = (res) => {
+        fn.call(this, res);
+        return res;
+      };
+    }
   });
 
   schema.post('find', fn);
