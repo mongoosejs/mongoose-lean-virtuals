@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "docs": "acquit-markdown -r acquit-ignore -p './test/examples.test.js' > examples.md",
+    "lint": "eslint .",
     "test": "mocha ./test/*.js",
     "test-integration": "mocha ./test/integration.js",
     "test-travis": "istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec ./test/*"
@@ -27,6 +28,7 @@
     "acquit-ignore": "0.1.0",
     "acquit-markdown": "0.1.0",
     "co": "4.6.0",
+    "eslint": "5.16.0",
     "istanbul": "0.4.5",
     "mocha": "5.2.x",
     "mongoose": "5.x"
@@ -39,5 +41,63 @@
   "bugs": {
     "url": "https://github.com/vkarpov15/mongoose-lean-virtuals/issues"
   },
-  "homepage": "https://github.com/vkarpov15/mongoose-lean-virtuals"
+  "homepage": "https://github.com/vkarpov15/mongoose-lean-virtuals",
+  "eslintConfig": {
+    "extends": [
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 2015
+    },
+    "env": {
+      "node": true,
+      "es6": true
+    },
+    "rules": {
+      "comma-style": "error",
+      "consistent-this": [
+        "error",
+        "_this"
+      ],
+      "indent": [
+        "error",
+        2,
+        {
+          "SwitchCase": 1,
+          "VariableDeclarator": 2
+        }
+      ],
+      "keyword-spacing": "error",
+      "no-buffer-constructor": "warn",
+      "no-console": "off",
+      "no-multi-spaces": "error",
+      "func-call-spacing": "error",
+      "no-trailing-spaces": "error",
+      "quotes": [
+        "error",
+        "single"
+      ],
+      "semi": "error",
+      "space-before-blocks": "error",
+      "space-before-function-paren": [
+        "error",
+        "never"
+      ],
+      "space-infix-ops": "error",
+      "space-unary-ops": "error",
+      "no-var": "warn",
+      "prefer-const": "warn",
+      "strict": [
+        "error",
+        "global"
+      ],
+      "no-restricted-globals": [
+        "error",
+        {
+          "name": "context",
+          "message": "Don't use Mocha's global context"
+        }
+      ]
+    }
+  }
 }
