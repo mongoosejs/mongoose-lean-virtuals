@@ -1,3 +1,7 @@
+0.4.2 / 2019-05-09
+==================
+ * fix: handle virtuals in nested schemas with find() #22
+
 0.4.1 / 2019-05-07
 ==================
  * fix: support Mongoose 5.x cursors #21
