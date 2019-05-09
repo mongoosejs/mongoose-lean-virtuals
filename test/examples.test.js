@@ -26,7 +26,9 @@ describe('examples', function() {
         Model.findOneAndUpdate({}, { name: 'VAL' }).lean({ virtuals: true })
       ])).
       then(results => {
-        const [findRes, findOneRes, findOneAndUpdateRes] = results;
+        const findRes = results[0];
+        const findOneRes = results[1];
+        const findOneAndUpdateRes = results[2];
         assert.equal(findRes[0].lowercase, 'val');
         assert.equal(findOneRes.lowercase, 'val');
         assert.equal(findOneAndUpdateRes.lowercase, 'val');
