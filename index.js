@@ -40,7 +40,6 @@ function attachVirtuals(schema, res) {
     if (Array.isArray(this._mongooseOptions.lean.virtuals)) {
       toApply = this._mongooseOptions.lean.virtuals;
     }
-    var numVirtuals = toApply.length;
     var _ret;
     if (Array.isArray(res)) {
       var len = res.length;
@@ -70,6 +69,12 @@ function attachVirtuals(schema, res) {
 
 function attachVirtualsToDoc(schema, doc, virtuals) {
   var numVirtuals = virtuals.length;
+  if (Array.isArray(doc)) {
+    for (var i = 0; i < doc.length; ++i) {
+      attachVirtualsToDoc(schema, doc[i], virtuals);
+    }
+    return;
+  }
   for (var i = 0; i < numVirtuals; ++i) {
     var virtual = virtuals[i];
     var sp = virtual.split('.');
@@ -80,5 +85,4 @@ function attachVirtualsToDoc(schema, doc, virtuals) {
     }
     cur[sp[sp.length - 1]] = schema.virtuals[virtual].applyGetters(void 0, doc);
   }
-  return cur;
 }

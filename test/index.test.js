@@ -132,7 +132,7 @@ describe('Virtuals work with cursor', function() {
 });
 
 // Skipping for now since this doesn't work.
-describe.skip('Nested schema virtuals work', function() {
+describe('Nested schema virtuals work', function() {
   let parentDocId;
   let parentModel;
 
