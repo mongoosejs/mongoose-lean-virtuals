@@ -76,6 +76,7 @@ function attachVirtuals(schema, res) {
 
 function attachVirtualsToDoc(schema, doc, virtuals) {
   const numVirtuals = virtuals.length;
+  if (doc == null) return;
   if (Array.isArray(doc)) {
     for (let i = 0; i < doc.length; ++i) {
       attachVirtualsToDoc(schema, doc[i], virtuals);
