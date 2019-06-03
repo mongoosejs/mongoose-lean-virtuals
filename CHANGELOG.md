@@ -1,3 +1,7 @@
+0.4.3 / 2019-06-03
+==================
+ * fix: avoid trying to virtualize undefined doc #24 [AlexandreGymlib](https://github.com/AlexandreGymlib)
+
 0.4.2 / 2019-05-09
 ==================
  * fix: handle virtuals in nested schemas with find() #22
