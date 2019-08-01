@@ -61,7 +61,7 @@ function attachVirtuals(schema, res) {
     for (let i = 0; i < schema.childSchemas.length; ++i) {
       const _path = schema.childSchemas[i].model.path;
       const _schema = schema.childSchemas[i].schema;
-      const _doc = mpath.get(_path, res);
+      const _doc = _path && mpath.get(_path, res);
       if (_doc == null) {
         continue;
       }
