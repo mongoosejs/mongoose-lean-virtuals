@@ -1,6 +1,6 @@
 {
   "name": "mongoose-lean-virtuals",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "Attach virtuals to the results of mongoose queries when using `.lean()`",
   "main": "index.js",
   "scripts": {

@@ -1,3 +1,7 @@
+0.4.4 / 2019-09-23
+==================
+ * fix: check for empty path #26 [thoglen](https://github.com/thoglen)
+
 0.4.3 / 2019-06-03
 ==================
  * fix: avoid trying to virtualize undefined doc #24 [AlexandreGymlib](https://github.com/AlexandreGymlib)
