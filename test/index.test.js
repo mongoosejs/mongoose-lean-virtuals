@@ -5,6 +5,8 @@ const co = require('co');
 const mongoose = require('mongoose');
 const mongooseLeanVirtuals = require('../');
 
+const Schema = mongoose.Schema;
+
 let baseDocId;
 let baseModel;
 let baseObj;
@@ -15,6 +17,7 @@ before(function() {
     yield mongoose.connect('mongodb://localhost:27017/mongooseLeanVirtuals', {
       useFindAndModify: false,
       useNewUrlParser: true,
+      useUnifiedTopology: true
     });
     yield mongoose.connection.dropDatabase();
 
@@ -197,6 +200,29 @@ describe('Nested schema virtuals work', function() {
       assert.equal(doc.nested.lower, 'foo');
       assert.equal(doc.arr[0].lower, 'bar');
       assert.equal(doc.arr[1].lower, 'baz');
+    });
+  });
+
+  it('child schemas (gh-28)', function() {
+    const barSchema = Schema({ number: Number });
+    barSchema.plugin(mongooseLeanVirtuals);
+    barSchema.virtual('doubleNumber').get(function() {
+      return this.number * 2;
+    });
+    const Bar = mongoose.model('gh28_bar', barSchema);
+
+    const fooSchema = Schema({ bars: [Bar.schema] });
+    fooSchema.plugin(mongooseLeanVirtuals);
+    fooSchema.virtual('barDoubleTotal').get(function() {
+      return this.bars.map(b => b.doubleNumber).reduce((a, c) => a + c);
+    });
+    const Foo = mongoose.model('gh28_foo', fooSchema);
+
+    return co(function*() {
+      yield Foo.create({ bars: [{ number: 1 }, { number: 2 }] });
+
+      const doc = yield Foo.findOne().lean({ virtuals: true });
+      assert.equal(doc.barDoubleTotal, 6);
     });
   });
 });
