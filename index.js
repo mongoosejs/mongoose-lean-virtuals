@@ -43,37 +43,43 @@ function attachVirtuals(schema, res) {
   }
 
   if (this._mongooseOptions.lean && this._mongooseOptions.lean.virtuals) {
+    const prop = this._mongooseOptions.lean.virtuals;
     let toApply = virtuals;
-    if (Array.isArray(this._mongooseOptions.lean.virtuals)) {
-      toApply = this._mongooseOptions.lean.virtuals;
-    }
-    let _ret;
-    if (Array.isArray(res)) {
-      const len = res.length;
-      for (let i = 0; i < len; ++i) {
-        attachVirtualsToDoc(schema, res[i], toApply);
-      }
-      _ret = res;
-    } else {
-      _ret = attachVirtualsToDoc(schema, res, toApply);
+    if (Array.isArray(prop)) {
+      toApply = prop;
     }
 
-    for (let i = 0; i < schema.childSchemas.length; ++i) {
-      const _path = schema.childSchemas[i].model.path;
-      const _schema = schema.childSchemas[i].schema;
-      if (!_path) {
-        continue; 
-      }
-      const _doc = mpath.get(_path, res);
-      if (_doc == null) {
-        continue;
-      }
-      attachVirtuals.call(this, _schema, _doc);
-    }
-
-    return _ret;
+    applyVirtualsToChildren(this, schema, res);
+    return applyVirtualsToResult(schema, res, toApply);
   } else {
     return res;
+  }
+}
+
+function applyVirtualsToResult(schema, res, toApply) {
+  if (Array.isArray(res)) {
+    const len = res.length;
+    for (let i = 0; i < len; ++i) {
+      attachVirtualsToDoc(schema, res[i], toApply);
+    }
+    return res;
+  } else {
+    return attachVirtualsToDoc(schema, res, toApply);
+  }
+}
+
+function applyVirtualsToChildren(doc, schema, res) {
+  for (let i = 0; i < schema.childSchemas.length; ++i) {
+    const _path = schema.childSchemas[i].model.path;
+    const _schema = schema.childSchemas[i].schema;
+    if (!_path) {
+      continue;
+    }
+    const _doc = mpath.get(_path, res);
+    if (_doc == null) {
+      continue;
+    }
+    attachVirtuals.call(doc, _schema, _doc);
   }
 }
 
