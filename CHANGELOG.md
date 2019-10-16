@@ -1,3 +1,7 @@
+0.5.0 / 2019-10-16
+==================
+ * fix: use post order traversal so child schema virtuals are set before parent schema #28
+
 0.4.4 / 2019-09-23
 ==================
  * fix: check for empty path #26 [thoglen](https://github.com/thoglen)
