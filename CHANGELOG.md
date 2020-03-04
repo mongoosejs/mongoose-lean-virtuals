@@ -1,3 +1,7 @@
+0.6.0 / 2020-03-04
+==================
+ * feat: attach lean virtuals to result of `findOneAndRemove()` and `findOneAndDelete()` #29 [isaacdecoded](https://github.com/isaacdecoded)
+
 0.5.0 / 2019-10-16
 ==================
  * fix: use post order traversal so child schema virtuals are set before parent schema #28
