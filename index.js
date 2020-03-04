@@ -21,6 +21,8 @@ module.exports = function mongooseLeanVirtuals(schema) {
   schema.post('find', fn);
   schema.post('findOne', fn);
   schema.post('findOneAndUpdate', fn);
+  schema.post('findOneAndRemove', fn);
+  schema.post('findOneAndDelete', fn);
 };
 
 function attachVirtualsMiddleware(schema) {

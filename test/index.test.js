@@ -8,9 +8,30 @@ const mongooseLeanVirtuals = require('../');
 const Schema = mongoose.Schema;
 
 let baseDocId;
+let baseDocIdToDelete;
+let baseDocIdToRemove;
 let baseModel;
 let baseObj;
 let baseSchema;
+
+const createRemovableDocs = () => {
+  return co(function*() {
+    const baseDocToDelete = yield baseModel.create(baseObj);
+    const baseDocToRemove = yield baseModel.create(baseObj);
+    baseDocIdToDelete = baseDocToDelete._id;
+    baseDocIdToRemove = baseDocToRemove._id;
+  });
+}
+
+const getDocIdBySupportedOp = (op) => {
+  if (op === 'findOneAndDelete') {
+    return baseDocIdToDelete;
+  } else if (op === 'findOneAndRemove') {
+    return baseDocIdToRemove;
+  } else {
+    return baseDocId;
+  }
+}
 
 before(function() {
   return co(function*() {
@@ -74,14 +95,26 @@ const supportedOps = {
     leanOptions = leanOptions || defaultLeanOptions;
     return model.findOneAndUpdate({}, {}).lean(leanOptions).exec();
   },
+  'findOneAndRemove': function(model, docId, leanOptions) {
+    leanOptions = leanOptions || defaultLeanOptions;
+    return model.findOneAndRemove({ _id: docId }).lean(leanOptions).exec();
+  },
+  'findOneAndDelete': function(model, docId, leanOptions) {
+    leanOptions = leanOptions || defaultLeanOptions;
+    return model.findOneAndDelete({ _id: docId }).lean(leanOptions).exec();
+  },
 };
 const supportedOpsKeys = Object.keys(supportedOps);
 
 describe('Top level leaned virtuals work', function() {
+  before(function() {
+    createRemovableDocs();
+  });
   supportedOpsKeys.forEach(key => {
     it(`with ${key}`, function() {
       return co(function*() {
-        const doc = yield supportedOps[key](baseModel, baseDocId);
+        const docId = getDocIdBySupportedOp(key);
+        const doc = yield supportedOps[key](baseModel, docId);
         assert.ok(doc);
         assert.equal(doc.id, doc._id.toHexString());
         assert.equal(doc.name, 'Val');
@@ -112,10 +145,14 @@ describe('Cursor', function() {
 });
 
 describe('Nested virtuals work', function() {
+  before(function() {
+    createRemovableDocs();
+  });
   supportedOpsKeys.forEach(key => {
     it(`with ${key}`, function() {
       return co(function*() {
-        const doc = yield supportedOps[key](baseModel, baseDocId);
+        const docId = getDocIdBySupportedOp(key);
+        const doc = yield supportedOps[key](baseModel, docId);
         assert.ok(doc);
         assert.equal(doc.nested.test, 'Foo');
         assert.equal(doc.nested.upperCaseTest, 'FOO');
@@ -136,7 +173,9 @@ describe('Virtuals work with cursor', function() {
 
 // Skipping for now since this doesn't work.
 describe('Nested schema virtuals work', function() {
-  let parentDocId;
+  let parentBaseDocId;
+  let parentDocIdToRemove;
+  let parentDocIdToDelete;
   let parentModel;
 
   before(function() {
@@ -152,13 +191,30 @@ describe('Nested schema virtuals work', function() {
         nested: baseObj,
         arr: [baseObj, baseObj],
       });
-      parentDocId = parentDoc._id;
+      const parentDocToRemove = yield parentModel.create({
+        nested: baseObj,
+        arr: [baseObj, baseObj],
+      });
+      const parentDocToDelete = yield parentModel.create({
+        nested: baseObj,
+        arr: [baseObj, baseObj],
+      });
+      parentBaseDocId = parentDoc._id;
+      parentDocIdToRemove = parentDocToRemove._id;
+      parentDocIdToDelete = parentDocToDelete._id;
     });
   });
 
   supportedOpsKeys.forEach(key => {
     it(`with ${key}`, function() {
       return co(function*() {
+        let parentDocId = parentBaseDocId;
+        if (key === 'findOneAndRemove') {
+          parentDocId = parentDocIdToRemove;
+        }
+        if (key === 'findOneAndDelete') {
+          parentDocId = parentDocIdToDelete;
+        }
         const doc = yield supportedOps[key](parentModel, parentDocId);
         assert.ok(doc);
         assert.equal(doc.nested.name, 'Val');
