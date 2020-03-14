@@ -32,6 +32,18 @@ function attachVirtualsMiddleware(schema) {
 }
 
 function attachVirtuals(schema, res) {
+  if (schema.discriminators && Object.entries(schema.discriminators).length !== 0) {
+    Object.values(schema.discriminators).some(
+      function findCorrectDiscriminator(discriminator) {
+        const { key, value } = discriminator.discriminatorMapping;
+        if (res[key] == value) {
+          schema = discriminator;
+          return true;
+        }
+      }
+    )
+  }
+  
   const virtuals = [];
   const keys = Object.keys(schema.virtuals);
   for (let i = 0; i < keys.length; ++i) {
