@@ -21,7 +21,7 @@ const createRemovableDocs = () => {
     baseDocIdToDelete = baseDocToDelete._id;
     baseDocIdToRemove = baseDocToRemove._id;
   });
-}
+};
 
 const getDocIdBySupportedOp = (op) => {
   if (op === 'findOneAndDelete') {
@@ -31,7 +31,7 @@ const getDocIdBySupportedOp = (op) => {
   } else {
     return baseDocId;
   }
-}
+};
 
 before(function() {
   return co(function*() {

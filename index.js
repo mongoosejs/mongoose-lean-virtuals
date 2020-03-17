@@ -42,9 +42,9 @@ function attachVirtuals(schema, res) {
           return true;
         }
       }
-    )
+    );
   }
-  
+
   const virtuals = [];
   const keys = Object.keys(schema.virtuals);
   for (let i = 0; i < keys.length; ++i) {
