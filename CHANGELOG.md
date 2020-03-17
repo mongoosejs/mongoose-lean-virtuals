@@ -1,3 +1,7 @@
+0.6.1 / 2020-03-17
+==================
+ * fix: get virtuals from discriminator schema if discriminator key set #30 [makinde](https://github.com/makinde)
+
 0.6.0 / 2020-03-04
 ==================
  * feat: attach lean virtuals to result of `findOneAndRemove()` and `findOneAndDelete()` #29 [isaacdecoded](https://github.com/isaacdecoded)
