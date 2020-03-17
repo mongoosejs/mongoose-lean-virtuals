@@ -35,7 +35,8 @@ function attachVirtuals(schema, res) {
   if (schema.discriminators && Object.entries(schema.discriminators).length !== 0) {
     Object.values(schema.discriminators).some(
       function findCorrectDiscriminator(discriminator) {
-        const { key, value } = discriminator.discriminatorMapping;
+        const key = discriminator.discriminatorMapping.key;
+        const value = discriminator.discriminatorMapping.value;
         if (res[key] == value) {
           schema = discriminator;
           return true;
