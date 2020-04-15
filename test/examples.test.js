@@ -67,4 +67,32 @@ describe('examples', function() {
         assert.ok(!result.lowercase);
       });
   });
+
+  it('correctly applies getters on virtuals in lean queries', function() {
+    let getterCalled = false;
+    const childSchema = new mongoose.Schema({ name: String, parentId: 'ObjectId' });
+    const Child = mongoose.model('Child', childSchema);
+
+    const parentSchema = new mongoose.Schema({ name: String });
+    parentSchema.virtual('children', {
+      ref: 'Child',
+      localField: '_id',
+      foreignField: 'parentId'
+    });
+    parentSchema.virtual('children').getters.unshift(function(v) {
+      assert.ok(v);
+      getterCalled = true;
+      return v;
+    });
+    parentSchema.plugin(mongooseLeanVirtuals);
+    const Parent = mongoose.model('Parent', parentSchema);
+
+    Parent.create({ name: 'Darth Vader' })
+      .then(p => Child.create({ name: 'Luke Skywalker', parentId: p }))
+      .then(() => Parent.findOne().populate('children').lean({ virtuals: true }))
+      .then(doc => {
+        assert.ok(getterCalled);
+        assert.ok(doc.children);
+      });
+  });
 });
