@@ -34,7 +34,7 @@
     "mongoose": "5.x"
   },
   "peerDependencies": {
-    "mongoose": ">=4.11.0 || 5.x"
+    "mongoose": ">=5.9.9"
   },
   "author": "Valeri Karpov <val@karpov.io>",
   "license": "Apache 2.0",
