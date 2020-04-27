@@ -1,3 +1,7 @@
+0.6.2 / 2020-04-27
+==================
+ * fix: correctly pass existing field value to applyGetters #31 [makinde](https://github.com/makinde)
+
 0.6.1 / 2020-03-17
 ==================
  * fix: get virtuals from discriminator schema if discriminator key set #30 [makinde](https://github.com/makinde)
