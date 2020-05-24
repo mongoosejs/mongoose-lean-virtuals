@@ -1,3 +1,7 @@
+0.6.3 / 2020-05-24
+==================
+ * fix: skip checking discriminators if result is null #32
+
 0.6.2 / 2020-04-27
 ==================
  * fix: correctly pass existing field value to applyGetters #31 [makinde](https://github.com/makinde)
