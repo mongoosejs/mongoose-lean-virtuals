@@ -32,6 +32,13 @@ function attachVirtualsMiddleware(schema) {
 }
 
 function attachVirtuals(schema, res) {
+  if (res == null) {
+    return res;
+  }
+  if (!this._mongooseOptions.lean || !this._mongooseOptions.lean.virtuals) {
+    return res;
+  }
+
   if (schema.discriminators && Object.entries(schema.discriminators).length !== 0) {
     Object.values(schema.discriminators).some(
       function findCorrectDiscriminator(discriminator) {
@@ -51,22 +58,14 @@ function attachVirtuals(schema, res) {
     virtuals.push(keys[i]);
   }
 
-  if (res == null) {
-    return;
+  const prop = this._mongooseOptions.lean.virtuals;
+  let toApply = virtuals;
+  if (Array.isArray(prop)) {
+    toApply = prop;
   }
 
-  if (this._mongooseOptions.lean && this._mongooseOptions.lean.virtuals) {
-    const prop = this._mongooseOptions.lean.virtuals;
-    let toApply = virtuals;
-    if (Array.isArray(prop)) {
-      toApply = prop;
-    }
-
-    applyVirtualsToChildren(this, schema, res);
-    return applyVirtualsToResult(schema, res, toApply);
-  } else {
-    return res;
-  }
+  applyVirtualsToChildren(this, schema, res);
+  return applyVirtualsToResult(schema, res, toApply);
 }
 
 function applyVirtualsToResult(schema, res, toApply) {
