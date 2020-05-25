@@ -94,4 +94,80 @@ describe('examples', function() {
         assert.ok(doc.children);
       });
   });
+
+  it('lets you choose which virtuals to apply in the root schema (gh-34)', function() {
+    const schema = new mongoose.Schema({
+      name: String,
+      childs: [{ other: String }],
+    }, { id: false });
+
+    schema.virtual('lowercaseName').get(function() {
+      return this.name.toLowerCase();
+    });
+
+    schema.plugin(mongooseLeanVirtuals);
+
+    const Model = mongoose.model('gh34a', schema);
+
+    return Model.create({ name: 'Val', childs: [{ other: 'val' }] }).
+      then(() => Model.findOne().lean({ virtuals: ['lowercaseName'] })).
+      then(result => {
+        assert.equal(result.lowercaseName, 'val');
+      });
+  });
+
+  it('lets you choose which virtuals to apply in the nested schema (gh-34)', function() {
+    const subschema = new mongoose.Schema({
+      other: String,
+    }, { id: false });
+
+    subschema.virtual('uppercaseOther').get(function() {
+      return this.other.toUpperCase();
+    });
+
+    const schema = new mongoose.Schema({
+      name: String,
+      childs: [subschema],
+    }, { id: false });
+
+    schema.plugin(mongooseLeanVirtuals);
+
+    const Model = mongoose.model('gh34b', schema);
+
+    return Model.create({ name: 'Val', childs: [{ other: 'val' }] }).
+      then(() => Model.findOne().lean({ virtuals: ['childs.uppercaseOther'] })).
+      then(result => {
+        assert.equal(result.childs[0].uppercaseOther, 'VAL');
+      });
+  });
+
+  it('lets you choose which virtuals to apply in the root and nested (gh-34)', function() {
+    const subschema = new mongoose.Schema({
+      other: String,
+    }, { id: false });
+
+    subschema.virtual('uppercaseOther').get(function() {
+      return this.other.toUpperCase();
+    });
+
+    const schema = new mongoose.Schema({
+      name: String,
+      childs: [subschema],
+    }, { id: false });
+
+    schema.virtual('lowercaseName').get(function() {
+      return this.name.toLowerCase();
+    });
+
+    schema.plugin(mongooseLeanVirtuals);
+
+    const Model = mongoose.model('gh34c', schema);
+
+    return Model.create({ name: 'Val', childs: [{ other: 'val' }] }).
+      then(() => Model.findOne().lean({ virtuals: ['lowercaseName', 'childs.uppercaseOther'] })).
+      then(result => {
+        assert.equal(result.lowercaseName, 'val');
+        assert.equal(result.childs[0].uppercaseOther, 'VAL');
+      });
+  });
 });
