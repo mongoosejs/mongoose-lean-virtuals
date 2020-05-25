@@ -27,16 +27,25 @@ module.exports = function mongooseLeanVirtuals(schema) {
 
 function attachVirtualsMiddleware(schema) {
   return function(res) {
-    attachVirtuals.call(this, schema, res);
+    attachVirtualsToRes.call(this, res, schema);
   };
 }
 
-function attachVirtuals(schema, res) {
-  if (res == null) {
-    return res;
+function attachVirtualsToRes(res, schema) {
+  if (Array.isArray(res)) {
+    res.forEach((res) => attachVirtuals.call(this, schema, res));
+  }
+  else {
+    attachVirtuals.call(this, schema, res);
+  }
+}
+
+function attachVirtuals(schema, doc) {
+  if (doc == null) {
+    return doc;
   }
   if (!this._mongooseOptions.lean || !this._mongooseOptions.lean.virtuals) {
-    return res;
+    return doc;
   }
 
   if (schema.discriminators && Object.entries(schema.discriminators).length !== 0) {
@@ -44,7 +53,7 @@ function attachVirtuals(schema, res) {
       function findCorrectDiscriminator(discriminator) {
         const key = discriminator.discriminatorMapping.key;
         const value = discriminator.discriminatorMapping.value;
-        if (res[key] == value) {
+        if (doc[key] == value) {
           schema = discriminator;
           return true;
         }
@@ -64,20 +73,9 @@ function attachVirtuals(schema, res) {
     toApply = prop;
   }
 
-  applyVirtualsToChildren(this, schema, res);
-  return applyVirtualsToResult(schema, res, toApply);
-}
+  applyVirtualsToChildren(this, schema, doc);
 
-function applyVirtualsToResult(schema, res, toApply) {
-  if (Array.isArray(res)) {
-    const len = res.length;
-    for (let i = 0; i < len; ++i) {
-      attachVirtualsToDoc(schema, res[i], toApply);
-    }
-    return res;
-  } else {
-    return attachVirtualsToDoc(schema, res, toApply);
-  }
+  return attachVirtualsToDoc(schema, doc, toApply);
 }
 
 function applyVirtualsToChildren(doc, schema, res) {
@@ -91,19 +89,15 @@ function applyVirtualsToChildren(doc, schema, res) {
     if (_doc == null) {
       continue;
     }
-    attachVirtuals.call(doc, _schema, _doc);
+
+    attachVirtualsToRes.call(doc, _doc, _schema);
   }
 }
 
 function attachVirtualsToDoc(schema, doc, virtuals) {
   const numVirtuals = virtuals.length;
   if (doc == null) return;
-  if (Array.isArray(doc)) {
-    for (let i = 0; i < doc.length; ++i) {
-      attachVirtualsToDoc(schema, doc[i], virtuals);
-    }
-    return;
-  }
+
   for (let i = 0; i < numVirtuals; ++i) {
     const virtual = virtuals[i];
     const sp = virtual.split('.');
