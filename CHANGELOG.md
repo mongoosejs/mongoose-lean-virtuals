@@ -1,3 +1,7 @@
+0.6.4 / 2020-06-02
+==================
+ * fix: allow explicitly selecting subdocument virtuals #35 #34 [ChrisLahaye](https://github.com/ChrisLahaye)
+
 0.6.3 / 2020-05-24
 ==================
  * fix: skip checking discriminators if result is null #32
