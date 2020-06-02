@@ -21,7 +21,8 @@
     "mongodb"
   ],
   "dependencies": {
-    "mpath": "0.5.x"
+    "mpath": "0.5.x",
+    "array.prototype.flat": "1.2.3"
   },
   "devDependencies": {
     "acquit": "1.x",

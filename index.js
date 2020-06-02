@@ -1,5 +1,6 @@
 'use strict';
 
+const flat = require('array.prototype.flat');
 const mpath = require('mpath');
 
 module.exports = function mongooseLeanVirtuals(schema) {
@@ -106,7 +107,7 @@ function applyVirtualsToChildren(doc, schema, res, virtuals) {
       continue;
     }
     const _doc = mpath.get(_path, res);
-    if (_doc == null) {
+    if (_doc == null || (Array.isArray(_doc) && flat(_doc, Infinity).length === 0)) {
       continue;
     }
 
