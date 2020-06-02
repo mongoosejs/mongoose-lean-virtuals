@@ -1,3 +1,7 @@
+0.6.5 / 2020-06-02
+==================
+ * fix: avoid infinite recursion on recursive schemas with virtuals #33
+
 0.6.4 / 2020-06-02
 ==================
  * fix: allow explicitly selecting subdocument virtuals #35 #34 [ChrisLahaye](https://github.com/ChrisLahaye)
