@@ -282,3 +282,33 @@ describe('Nested schema virtuals work', function() {
     });
   });
 });
+
+it('works with recursive schemas (gh-33)', function() {
+  const postSchema = Schema({
+    title: String,
+    content: String
+  });
+  const commentSchema = Schema({
+    content: String
+  });
+  commentSchema.virtual('answer').get(() => 42);
+  commentSchema.add({
+    comments: [commentSchema]
+  });
+  postSchema.add({ comments: [commentSchema] });
+  postSchema.plugin(mongooseLeanVirtuals);
+
+  const Post = mongoose.model('gh33_Post', postSchema);
+
+  return co(function*() {
+    yield Post.create({
+      title: 'Test',
+      content: 'This is a test',
+      comments: [{ content: 'It works!' }]
+    });
+
+    const doc = yield Post.findOne().lean({ virtuals: true });
+    assert.equal(doc.comments.length, 1);
+    assert.equal(doc.comments[0].answer, 42);
+  });
+});
