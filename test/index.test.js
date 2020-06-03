@@ -312,3 +312,70 @@ it('works with recursive schemas (gh-33)', function() {
     assert.equal(doc.comments[0].answer, 42);
   });
 });
+
+describe('Discriminators work', () => {
+  let childDocId;
+  let childModel;
+
+  before(function() {
+    return co(function*() {
+      const childSchema = new mongoose.Schema({
+        name: String,
+        nested2: {
+          test: String
+        }
+      });
+      childSchema.virtual('upperCaseName').get(function() {
+        return this.name.toUpperCase();
+      });
+      childSchema.virtual('nested.lowerCaseTest').get(function() {
+        return this.nested.test.toLowerCase();
+      });
+
+      childModel = baseModel.discriminator('childModel', childSchema);
+
+      const childDoc = yield childModel.create({
+        name: 'Val',
+        nested: {
+          test: 'Foo',
+        }
+      });
+      childDocId = childDoc._id;
+
+      yield childModel.create({
+        name: 'Val',
+        nested: {
+          test: 'Foo',
+        }
+      });
+    });
+  });
+
+  it('with find', function() {
+    return co(function*() {
+      const docs = yield childModel.find();
+      assert.ok(docs);
+      docs.forEach((doc) => {
+        assert.equal(doc.name, 'Val');
+        assert.equal(doc.lowerCaseName, 'val');
+        assert.equal(doc.upperCaseName, 'VAL');
+        assert.equal(doc.nested.test, 'Foo');
+        assert.equal(doc.nested.upperCaseTest, 'FOO');
+        assert.equal(doc.nested.lowerCaseTest, 'foo');
+      });
+    });
+  });
+
+  it('with findOne', () => {
+    return co(function*() {
+      const doc = yield supportedOps.find(childModel, childDocId);
+      assert.ok(doc);
+      assert.equal(doc.name, 'Val');
+      assert.equal(doc.lowerCaseName, 'val');
+      assert.equal(doc.upperCaseName, 'VAL');
+      assert.equal(doc.nested.test, 'Foo');
+      assert.equal(doc.nested.upperCaseTest, 'FOO');
+      assert.equal(doc.nested.lowerCaseTest, 'foo');
+    });
+  });
+});

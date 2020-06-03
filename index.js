@@ -50,21 +50,8 @@ function attachVirtuals(schema, res, virtuals) {
     return res;
   }
 
-  if (schema.discriminators && Object.entries(schema.discriminators).length !== 0) {
-    Object.values(schema.discriminators).some(
-      function findCorrectDiscriminator(discriminator) {
-        const key = discriminator.discriminatorMapping.key;
-        const value = discriminator.discriminatorMapping.value;
-        if (res[key] == value) {
-          schema = discriminator;
-          return true;
-        }
-      }
-    );
-  }
-
   let virtualsForChildren = virtuals;
-  let toApply;
+  let toApply = null;
 
   if (Array.isArray(virtuals)) {
     virtualsForChildren = [];
@@ -78,8 +65,6 @@ function attachVirtuals(schema, res, virtuals) {
         virtualsForChildren.push(virtual);
       }
     }
-  } else {
-    toApply = Object.keys(schema.virtuals);
   }
 
   applyVirtualsToChildren(this, schema, res, virtualsForChildren);
@@ -111,7 +96,7 @@ function applyVirtualsToChildren(doc, schema, res, virtuals) {
       continue;
     }
 
-    let virtualsForChild = virtuals;
+    let virtualsForChild = null;
     if (Array.isArray(virtuals)) {
       virtualsForChild = [];
       const len = virtuals.length;
@@ -123,12 +108,11 @@ function applyVirtualsToChildren(doc, schema, res, virtuals) {
       }
     }
 
-    attachVirtuals.call(doc, _schema, _doc, virtualsForChild);
+    applyVirtualsToResult.call(doc, _schema, _doc, virtualsForChild);
   }
 }
 
 function attachVirtualsToDoc(schema, doc, virtuals) {
-  const numVirtuals = virtuals.length;
   if (doc == null) return;
   if (Array.isArray(doc)) {
     for (let i = 0; i < doc.length; ++i) {
@@ -136,9 +120,26 @@ function attachVirtualsToDoc(schema, doc, virtuals) {
     }
     return;
   }
+
+  if (schema.discriminators && Object.entries(schema.discriminators).length !== 0) {
+    Object.values(schema.discriminators).some(
+      function findCorrectDiscriminator(discriminator) {
+        const key = discriminator.discriminatorMapping.key;
+        const value = discriminator.discriminatorMapping.value;
+        if (doc[key] == value) {
+          schema = discriminator;
+        }
+      }
+    );
+  }
+
+  if (virtuals == null) {
+    virtuals = Object.keys(schema.virtuals);
+  }
+  const numVirtuals = virtuals.length;
   for (let i = 0; i < numVirtuals; ++i) {
     const virtual = virtuals[i];
-    const sp = virtual.split('.');
+    const sp = Array.isArray(virtual) ? virtual : virtual.split('.');
     let cur = doc;
     for (let j = 0; j < sp.length - 1; ++j) {
       cur[sp[j]] = sp[j] in cur ? cur[sp[j]] : {};
