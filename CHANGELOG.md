@@ -1,3 +1,7 @@
+0.6.6 / 2020-06-03
+==================
+ * fix: discriminators when the query result is an array #37 #36 [FERNman](https://github.com/FERNman)
+
 0.6.5 / 2020-06-02
 ==================
  * fix: avoid infinite recursion on recursive schemas with virtuals #33
