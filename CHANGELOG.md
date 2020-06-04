@@ -1,3 +1,7 @@
+0.6.7 / 2020-06-04
+==================
+ * fix build for node v6 and v4
+
 0.6.6 / 2020-06-03
 ==================
  * fix: discriminators when the query result is an array #37 #36 [FERNman](https://github.com/FERNman)
