@@ -313,6 +313,34 @@ it('works with recursive schemas (gh-33)', function() {
   });
 });
 
+it('applies virtuals in doubly nested arrays (gh-38)', function() {
+  const subArraySchema = Schema({ name: String });
+  subArraySchema.virtual('lowercase').get(function() {
+    return this.name.toLowerCase();
+  });
+
+  const arraySchema = Schema({ subArray: [subArraySchema] });
+  const testSchema = Schema({ title: String, array: [arraySchema] });
+  testSchema.plugin(mongooseLeanVirtuals);
+  const Model = mongoose.model('gh38', testSchema);
+
+  return co(function*() {
+    yield Model.create({
+      title: 'test',
+      array: [{
+        subArray: [{
+          name: 'TEST',
+        }]
+      }]
+    });
+
+    const testDoc = yield Model.findOne({ title: 'test' }).lean({ virtuals: true });
+    const subObject = testDoc.array[0].subArray[0];
+    assert.equal(subObject.name, 'TEST');
+    assert.equal(subObject.lowercase, 'test');
+  });
+});
+
 describe('Discriminators work', () => {
   let childDocId;
   let childModel;
