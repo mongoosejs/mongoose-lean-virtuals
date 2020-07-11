@@ -108,7 +108,7 @@ function applyVirtualsToChildren(doc, schema, res, virtuals) {
       }
     }
 
-    applyVirtualsToResult.call(doc, _schema, _doc, virtualsForChild);
+    attachVirtuals.call(doc, _schema, _doc, virtualsForChild);
   }
 }
 
