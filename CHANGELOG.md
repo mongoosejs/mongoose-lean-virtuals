@@ -1,3 +1,7 @@
+0.6.8 / 2020-06-11
+==================
+ * fix: apply virtuals in doubly nested document arrays #38
+
 0.6.7 / 2020-06-04
 ==================
  * fix build for node v6 and v4
