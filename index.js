@@ -122,16 +122,15 @@ function attachVirtualsToDoc(schema, doc, virtuals) {
   }
 
   if (schema.discriminators && Object.keys(schema.discriminators).length > 0) {
-    Object.keys(schema.discriminators).find(
-      function findCorrectDiscriminator(discriminatorKey) {
-        const discriminator = schema.discriminators[discriminatorKey];
-        const key = discriminator.discriminatorMapping.key;
-        const value = discriminator.discriminatorMapping.value;
-        if (doc[key] == value) {
-          schema = discriminator;
-        }
+    for (const discriminatorKey of Object.keys(schema.discriminators)) {
+      const discriminator = schema.discriminators[discriminatorKey];
+      const key = discriminator.discriminatorMapping.key;
+      const value = discriminator.discriminatorMapping.value;
+      if (doc[key] == value) {
+        schema = discriminator;
+        break;
       }
-    );
+    }
   }
 
   if (virtuals == null) {
