@@ -1,3 +1,7 @@
+0.6.9 / 2020-08-29
+==================
+ * fix: avoid TypeError when there are multiple discriminators #39
+
 0.6.8 / 2020-06-11
 ==================
  * fix: apply virtuals in doubly nested document arrays #38
