@@ -259,6 +259,40 @@ describe('Nested schema virtuals work', function() {
     });
   });
 
+  it('can access parent doc (gh-40)', function() {
+    const childSchema = new mongoose.Schema({ firstName: String });
+    childSchema.virtual('fullName').get(function() {
+      if (this instanceof mongoose.Document) {
+        return `${this.firstName} ${this.parent().lastName}`;
+      }
+      return `${this.firstName} ${mongooseLeanVirtuals.parent(this).lastName}`;
+    });
+
+    const parentSchema = new mongoose.Schema({
+      firstName: String,
+      lastName: String,
+      child: childSchema,
+      children: [childSchema]
+    });
+    parentSchema.plugin(mongooseLeanVirtuals);
+
+    const Model = mongoose.model('gh40', parentSchema);
+
+    return co(function*() {
+      yield Model.create({
+        firstName: 'Anakin',
+        lastName: 'Skywalker',
+        child: { firstName: 'Luke' },
+        children: [{ firstName: 'Luke' }]
+      });
+
+      const doc = yield Model.findOne().lean({ virtuals: true });
+
+      assert.equal(doc.child.fullName, 'Luke Skywalker');
+      assert.equal(doc.children[0].fullName, 'Luke Skywalker');
+    });
+  });
+
   it('child schemas (gh-28)', function() {
     const barSchema = Schema({ number: Number });
     barSchema.plugin(mongooseLeanVirtuals);
