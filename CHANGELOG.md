@@ -1,3 +1,7 @@
+0.7.0 / 2020-10-06
+==================
+ * feat: add top-level `parent()` function that lets you get the subdocument's parent even though the subdoc is lean #40
+
 0.6.9 / 2020-08-29
 ==================
  * fix: avoid TypeError when there are multiple discriminators #39
