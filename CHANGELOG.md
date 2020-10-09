@@ -1,3 +1,7 @@
+0.7.1 / 2020-10-09
+==================
+ * fix: avoid WeakMap error when using arrays with `null` elements #41
+
 0.7.0 / 2020-10-06
 ==================
  * feat: add top-level `parent()` function that lets you get the subdocument's parent even though the subdoc is lean #40
