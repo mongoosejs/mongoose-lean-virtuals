@@ -259,7 +259,7 @@ describe('Nested schema virtuals work', function() {
     });
   });
 
-  it('can access parent doc (gh-40)', function() {
+  it('can access parent doc (gh-40) (gh-41)', function() {
     const childSchema = new mongoose.Schema({ firstName: String });
     childSchema.virtual('fullName').get(function() {
       if (this instanceof mongoose.Document) {
@@ -283,13 +283,14 @@ describe('Nested schema virtuals work', function() {
         firstName: 'Anakin',
         lastName: 'Skywalker',
         child: { firstName: 'Luke' },
-        children: [{ firstName: 'Luke' }]
+        children: [{ firstName: 'Luke' }, null]
       });
 
-      const doc = yield Model.findOne().lean({ virtuals: true });
+      let doc = yield Model.findOne().lean({ virtuals: true });
 
       assert.equal(doc.child.fullName, 'Luke Skywalker');
       assert.equal(doc.children[0].fullName, 'Luke Skywalker');
+      assert.equal(doc.children[1], null);
     });
   });
 

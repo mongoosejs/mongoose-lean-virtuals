@@ -84,14 +84,14 @@ function applyVirtualsToResult(schema, res, toApply, parent) {
   if (Array.isArray(res)) {
     const len = res.length;
     for (let i = 0; i < len; ++i) {
-      if (parent != null) {
+      if (parent != null && res[i] != null) {
         documentParentsMap.set(res[i], parent);
       }
       attachVirtualsToDoc(schema, res[i], toApply);
     }
     return res;
   } else {
-    if (parent != null) {
+    if (parent != null && res != null) {
       documentParentsMap.set(res, parent);
     }
     return attachVirtualsToDoc(schema, res, toApply);
