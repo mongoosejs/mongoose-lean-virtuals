@@ -1,3 +1,7 @@
+0.7.2 / 2020-10-12
+==================
+ * fix: make `parent()` tracking support case where array of subdocs contains primitives #41
+
 0.7.1 / 2020-10-09
 ==================
  * fix: avoid WeakMap error when using arrays with `null` elements #41
