@@ -279,18 +279,21 @@ describe('Nested schema virtuals work', function() {
     const Model = mongoose.model('gh40', parentSchema);
 
     return co(function*() {
-      yield Model.create({
+      let doc = yield Model.create({
         firstName: 'Anakin',
         lastName: 'Skywalker',
         child: { firstName: 'Luke' },
         children: [{ firstName: 'Luke' }, null]
       });
 
-      let doc = yield Model.findOne().lean({ virtuals: true });
+      yield Model.collection.updateOne({ _id: doc._id }, { $push: { children: 42 } });
+
+      doc = yield Model.findOne().lean({ virtuals: true });
 
       assert.equal(doc.child.fullName, 'Luke Skywalker');
       assert.equal(doc.children[0].fullName, 'Luke Skywalker');
       assert.equal(doc.children[1], null);
+      assert.equal(doc.children[2], 42);
     });
   });
 

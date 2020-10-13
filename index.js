@@ -84,14 +84,14 @@ function applyVirtualsToResult(schema, res, toApply, parent) {
   if (Array.isArray(res)) {
     const len = res.length;
     for (let i = 0; i < len; ++i) {
-      if (parent != null && res[i] != null) {
+      if (parent != null && res[i] != null && typeof res[i] === 'object') {
         documentParentsMap.set(res[i], parent);
       }
       attachVirtualsToDoc(schema, res[i], toApply);
     }
     return res;
   } else {
-    if (parent != null && res != null) {
+    if (parent != null && res != null && typeof res === 'object') {
       documentParentsMap.set(res, parent);
     }
     return attachVirtualsToDoc(schema, res, toApply);
@@ -128,7 +128,9 @@ function applyVirtualsToChildren(doc, schema, res, virtuals) {
 }
 
 function attachVirtualsToDoc(schema, doc, virtuals) {
-  if (doc == null) return;
+  if (doc == null || typeof doc !== 'object') {
+    return;
+  }
   if (Array.isArray(doc)) {
     for (let i = 0; i < doc.length; ++i) {
       attachVirtualsToDoc(schema, doc[i], virtuals);
