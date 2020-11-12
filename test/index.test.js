@@ -288,6 +288,7 @@ describe('Nested schema virtuals work', function() {
 
       yield Model.collection.updateOne({ _id: doc._id }, { $push: { children: 42 } });
 
+      // Would error out in v0.7.2 because of parent tracking and the '42' element
       doc = yield Model.findOne().lean({ virtuals: true });
 
       assert.equal(doc.child.fullName, 'Luke Skywalker');
@@ -376,6 +377,21 @@ it('applies virtuals in doubly nested arrays (gh-38)', function() {
     const subObject = testDoc.array[0].subArray[0];
     assert.equal(subObject.name, 'TEST');
     assert.equal(subObject.lowercase, 'test');
+  });
+});
+
+it('skips non-existent virtuals if specifying a list of virtuals (gh-42)', function() {
+  const testSchema = Schema({ title: String });
+  testSchema.virtual('test').get(() => 42);
+  testSchema.plugin(mongooseLeanVirtuals);
+  const Model = mongoose.model('gh42', testSchema);
+
+  return co(function*() {
+    yield Model.create({ title: 'test' });
+
+    const testDoc = yield Model.findOne({ title: 'test' }).lean({ virtuals: ['test', 'doesntexist'] });
+    assert.equal(testDoc.test, 42);
+    assert.strictEqual(testDoc.doesntexist, void 0);
   });
 });
 
