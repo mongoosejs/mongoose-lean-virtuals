@@ -1,3 +1,7 @@
+0.7.3 / 2020-11-12
+==================
+ * fix: skip non-existent virtuals when passing a list of virtual names to `lean()` #42
+
 0.7.2 / 2020-10-12
 ==================
  * fix: make `parent()` tracking support case where array of subdocs contains primitives #41
