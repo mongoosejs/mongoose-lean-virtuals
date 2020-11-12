@@ -156,6 +156,9 @@ function attachVirtualsToDoc(schema, doc, virtuals) {
   const numVirtuals = virtuals.length;
   for (let i = 0; i < numVirtuals; ++i) {
     const virtual = virtuals[i];
+    if (schema.virtuals[virtual] == null) {
+      continue;
+    }
     const sp = Array.isArray(virtual) ? virtual : virtual.split('.');
     let cur = doc;
     for (let j = 0; j < sp.length - 1; ++j) {
