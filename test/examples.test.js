@@ -170,4 +170,29 @@ describe('examples', function() {
         assert.equal(result.childs[0].uppercaseOther, 'VAL');
       });
   });
+
+  it('nested virtuals that are objects return the value (gh-43)', function() {
+    const schema = new mongoose.Schema({
+      nested: {
+        test: {
+          a: String
+        }
+      }
+    }, { id: false });
+
+    schema.virtual('nested.test2').get(function() {
+      return this.nested.test;
+    });
+
+    schema.plugin(mongooseLeanVirtuals);
+
+    const Model = mongoose.model('gh43c', schema);
+
+    return Model.create({ nested: { test: { a: 'Val' } } }).
+      then(() => Model.findOne().lean({ virtuals: ['nested.test2'] })).
+      then(result => {
+        assert.equal(result.nested.test.a, 'Val');
+        assert.equal(result.nested.test2.a, 'Val');
+      });
+  });
 });
