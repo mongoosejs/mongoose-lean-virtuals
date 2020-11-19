@@ -186,9 +186,43 @@ describe('examples', function() {
 
     schema.plugin(mongooseLeanVirtuals);
 
-    const Model = mongoose.model('gh43c', schema);
+    const Model = mongoose.model('gh43a', schema);
 
     return Model.create({ nested: { test: { a: 'Val' } } }).
+      then(() => Model.findOne().lean({ virtuals: ['nested.test2'] })).
+      then(result => {
+        assert.equal(result.nested.test.a, 'Val');
+        assert.equal(result.nested.test2.a, 'Val');
+      });
+  });
+
+  it('nested virtuals that are objects return the value that also have child schemas (gh-43)', function() {
+    const subschema = new mongoose.Schema({
+      other: String,
+    }, { id: false });
+
+    subschema.virtual('uppercaseOther').get(function() {
+      return this.other.toUpperCase();
+    });
+
+    const schema = new mongoose.Schema({
+      childs: [subschema],
+      nested: {
+        test: {
+          a: String
+        }
+      }
+    }, { id: false });
+
+    schema.virtual('nested.test2').get(function() {
+      return this.nested.test;
+    });
+
+    schema.plugin(mongooseLeanVirtuals);
+
+    const Model = mongoose.model('gh43b', schema);
+
+    return Model.create({ childs: [{ other: 'Val' }], nested: { test: { a: 'Val' } } }).
       then(() => Model.findOne().lean({ virtuals: ['nested.test2'] })).
       then(result => {
         assert.equal(result.nested.test.a, 'Val');
