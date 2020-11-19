@@ -76,7 +76,7 @@ function attachVirtuals(schema, res, virtuals, parent) {
     }
   }
 
-  applyVirtualsToChildren(this, schema, res, virtualsForChildren);
+  applyVirtualsToChildren(this, schema, res, virtualsForChildren, parent);
   return applyVirtualsToResult(schema, res, toApply, parent);
 }
 
@@ -98,8 +98,9 @@ function applyVirtualsToResult(schema, res, toApply, parent) {
   }
 }
 
-function applyVirtualsToChildren(doc, schema, res, virtuals) {
+function applyVirtualsToChildren(doc, schema, res, virtuals, parent) {
   const len = schema.childSchemas.length;
+  let attachedVirtuals = false;
   for (let i = 0; i < len; ++i) {
     const _path = schema.childSchemas[i].model.path;
     const _schema = schema.childSchemas[i].schema;
@@ -124,6 +125,13 @@ function applyVirtualsToChildren(doc, schema, res, virtuals) {
     }
 
     attachVirtuals.call(doc, _schema, _doc, virtualsForChild, res);
+    attachedVirtuals = true;
+  }
+
+  if (virtuals && virtuals.length && !attachedVirtuals) {
+    attachVirtualsToDoc(schema, res, virtuals.map(function(virtual) {
+      return virtual.join('.');
+    }), parent);
   }
 }
 
