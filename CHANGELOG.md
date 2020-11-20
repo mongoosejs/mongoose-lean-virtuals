@@ -1,3 +1,7 @@
+0.7.4 / 2020-11-20
+==================
+ * fix: support nested virtuals #43 [rdougan](https://github.com/rdougan)
+
 0.7.3 / 2020-11-12
 ==================
  * fix: skip non-existent virtuals when passing a list of virtual names to `lean()` #42
