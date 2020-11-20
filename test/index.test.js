@@ -45,7 +45,10 @@ before(function() {
     baseSchema = new mongoose.Schema({
       name: String,
       nested: {
-        test: String
+        test: String,
+        objectTest: {
+          test: String
+        }
       }
     });
     baseSchema.virtual('lowerCaseName').get(function() {
@@ -53,6 +56,9 @@ before(function() {
     });
     baseSchema.virtual('nested.upperCaseTest').get(function() {
       return this.nested.test.toUpperCase();
+    });
+    baseSchema.virtual('nested.virtualObjectTest').get(function() {
+      return this.nested.objectTest;
     });
     baseSchema.plugin(mongooseLeanVirtuals);
 
@@ -62,6 +68,9 @@ before(function() {
       name: 'Val',
       nested: {
         test: 'Foo',
+        objectTest: {
+          test: 'Bar'
+        }
       }
     };
     const baseDoc = yield baseModel.create(baseObj);
@@ -156,6 +165,25 @@ describe('Nested virtuals work', function() {
         assert.ok(doc);
         assert.equal(doc.nested.test, 'Foo');
         assert.equal(doc.nested.upperCaseTest, 'FOO');
+        assert.equal(doc.nested.objectTest.test, 'Bar');
+        assert.equal(doc.nested.virtualObjectTest.test, 'Bar');
+      });
+    });
+  });
+});
+
+describe('Nested object virtuals work (gh-43)', function() {
+  before(function() {
+    createRemovableDocs();
+  });
+  supportedOpsKeys.forEach(key => {
+    it(`with ${key}`, function() {
+      return co(function*() {
+        const docId = getDocIdBySupportedOp(key);
+        const doc = yield supportedOps[key](baseModel, docId);
+        assert.ok(doc);
+        assert.equal(doc.nested.objectTest.test, 'Bar');
+        assert.equal(doc.nested.virtualObjectTest.test, 'Bar');
       });
     });
   });
