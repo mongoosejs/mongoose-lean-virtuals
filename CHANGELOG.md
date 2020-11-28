@@ -1,3 +1,7 @@
+0.7.5 / 2020-11-28
+==================
+ * fix: fix .length invalid property access on null #44 [maximilianschmid](https://github.com/maximilianschmid)
+
 0.7.4 / 2020-11-20
 ==================
  * fix: support nested virtuals #43 [rdougan](https://github.com/rdougan)
