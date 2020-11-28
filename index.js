@@ -124,7 +124,7 @@ function applyVirtualsToChildren(doc, schema, res, virtuals, parent) {
       }
     }
 
-    if (virtualsForChild.length > 0) {
+    if (virtualsForChild && virtualsForChild.length > 0) {
       attachVirtuals.call(doc, _schema, _doc, virtualsForChild, res);
       attachedVirtuals = true;
     }
