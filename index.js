@@ -122,12 +122,14 @@ function applyVirtualsToChildren(doc, schema, res, virtuals, parent) {
           virtualsForChild.push(virtual.slice(1));
         }
       }
+
+      if (virtualsForChild.length === 0) {
+        continue;
+      }
     }
 
-    if (virtualsForChild && virtualsForChild.length > 0) {
-      attachVirtuals.call(doc, _schema, _doc, virtualsForChild, res);
-      attachedVirtuals = true;
-    }
+    attachVirtuals.call(doc, _schema, _doc, virtualsForChild, res);
+    attachedVirtuals = true;
   }
 
   if (virtuals && virtuals.length && !attachedVirtuals) {
