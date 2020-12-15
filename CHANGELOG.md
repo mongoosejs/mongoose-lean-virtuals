@@ -1,3 +1,7 @@
+0.7.6 / 2020-12-15
+==================
+ * fix: propagate `virtuals: true` to subdocuments #47 #43
+
 0.7.5 / 2020-11-28
 ==================
  * fix: fix .length invalid property access on null #44 [maximilianschmid](https://github.com/maximilianschmid)
