@@ -229,4 +229,96 @@ describe('examples', function() {
         assert.equal(result.nested.test2.a, 'Val');
       });
   });
+
+  it('returns the same nested and referenced virtuals whether all virtuals selected or each specifically selected', function() {
+    let childGetterCalled = false;
+    let parentGetterCalled = false;
+    let surnameGetterCalled = false;
+    let allegianceGetterCalled = false;
+
+    const surnameSchema = new mongoose.Schema({
+      name: String,
+    }, { id: false });
+    surnameSchema.virtual('uppercaseSurname').get(function() {
+      surnameGetterCalled = true;
+      return this.name.toUpperCase();
+    });
+
+    const childSchema = new mongoose.Schema({
+      name: String,
+      surname: surnameSchema,
+    });
+    childSchema.plugin(mongooseLeanVirtuals);
+    const Child = mongoose.model('Child2', childSchema);
+    childSchema.virtual('uppercaseName').get(function() {
+      childGetterCalled = true;
+      return this.name.toUpperCase();
+    });
+
+    const allegianceSchema = new mongoose.Schema({
+      name: String,
+    }, { id: false });
+    allegianceSchema.virtual('uppercaseAllegiance').get(function() {
+      allegianceGetterCalled = true;
+      return this.name.toUpperCase();
+    });
+
+    const parentSchema = new mongoose.Schema({
+      role: String,
+      surname: surnameSchema,
+      allegiance: allegianceSchema,
+      child: {type: mongoose.Schema.Types.ObjectId, ref: 'Child2'},
+    }, { id: false });
+
+    parentSchema.virtual('uppercaseRole').get(function() {
+      parentGetterCalled = true;
+      return this.role.toUpperCase();
+    });
+    parentSchema.plugin(mongooseLeanVirtuals);
+    const Parent = mongoose.model('Parent2', parentSchema);
+
+    return Child.create({ name: 'Luke', surname: {name: 'Skywalker'} })
+      .then(c => Parent.create({ role: 'Father', surname: {name: 'Vader'}, allegiance: {name: 'Empire'}, child: c }))
+      .then(() => Parent.findOne().populate('child').lean({ virtuals: true }))
+      .then(doc => {
+        assert.ok(childGetterCalled);
+        assert.ok(parentGetterCalled);
+        assert.ok(surnameGetterCalled);
+        assert.ok(allegianceGetterCalled);
+        assert.equal(doc.role, 'Father');
+        assert.equal(doc.uppercaseRole, 'FATHER');
+        assert.equal(doc.surname.name, 'Vader');
+        assert.equal(doc.surname.uppercaseSurname, 'VADER');
+        assert.equal(doc.allegiance.name, 'Empire');
+        assert.equal(doc.allegiance.uppercaseAllegiance, 'EMPIRE');
+        assert.equal(doc.child.name, 'Luke');
+        assert.equal(doc.child.uppercaseName, 'LUKE');
+        assert.equal(doc.child.surname.name, 'Skywalker');
+        assert.equal(doc.child.surname.uppercaseSurname, 'SKYWALKER');
+        // reset getter checks
+        childGetterCalled = false;
+        parentGetterCalled = false;
+        surnameGetterCalled = false;
+        allegianceGetterCalled = false;
+      })
+      .then(() => Parent.findOne().populate('child').lean({
+        virtuals: ['uppercaseRole', 'surname.uppercaseSurname', 'allegiance.uppercaseAllegiance', 'child.uppercaseName', 'child.surname.uppercaseSurname']
+      }))
+      .then(doc => {
+        assert.ok(childGetterCalled);
+        assert.ok(parentGetterCalled);
+        assert.ok(surnameGetterCalled);
+        assert.ok(allegianceGetterCalled);
+        assert.equal(doc.role, 'Father');
+        assert.equal(doc.uppercaseRole, 'FATHER');
+        assert.equal(doc.surname.name, 'Vader');
+        assert.equal(doc.surname.uppercaseSurname, 'VADER');
+        assert.equal(doc.allegiance.name, 'Empire');
+        assert.equal(doc.allegiance.uppercaseAllegiance, 'EMPIRE');
+        assert.equal(doc.child.name, 'Luke');
+        assert.equal(doc.child.uppercaseName, 'LUKE');
+        assert.equal(doc.child.surname.name, 'Skywalker');
+        assert.equal(doc.child.surname.uppercaseSurname, 'SKYWALKER');
+      });
+  });
 });
