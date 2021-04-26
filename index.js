@@ -77,24 +77,45 @@ function attachVirtuals(schema, res, virtuals, parent) {
   }
 
   applyVirtualsToChildren(this, schema, res, virtualsForChildren, parent);
-  return applyVirtualsToResult(schema, res, toApply, parent);
+  addToParentMap(res, parent);
+  return applyVirtualsToResult(schema, res, toApply);
 }
 
-function applyVirtualsToResult(schema, res, toApply, parent) {
+function applyVirtualsToResult(schema, res, toApply) {
   if (Array.isArray(res)) {
     const len = res.length;
     for (let i = 0; i < len; ++i) {
-      if (parent != null && res[i] != null && typeof res[i] === 'object') {
-        documentParentsMap.set(res[i], parent);
-      }
       attachVirtualsToDoc(schema, res[i], toApply);
     }
     return res;
   } else {
-    if (parent != null && res != null && typeof res === 'object') {
-      documentParentsMap.set(res, parent);
-    }
     return attachVirtualsToDoc(schema, res, toApply);
+  }
+}
+
+function addToParentMap(res, parent) {
+  if (parent == null || res == null) {
+    return;
+  }
+
+  if (Array.isArray(parent)) {
+    for (let i = 0; i < parent.length; ++i) {
+      addToParentMap(res[i], parent[i]);
+    }
+    return;
+  }
+
+  if (Array.isArray(res)) {
+    for (const _res of res) {
+      if (_res != null && typeof _res === 'object') {
+        documentParentsMap.set(_res, parent);
+      }
+    }
+    return;
+  }
+
+  if (typeof res === 'object') {
+    documentParentsMap.set(res, parent);
   }
 }
 
