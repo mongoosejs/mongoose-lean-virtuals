@@ -1,3 +1,8 @@
+0.8.0 / 2021-04-26
+==================
+ * fix: handle calling `parent()` in virtual when using `find()` with multiple results #51
+ * fix: require Mongoose >= 5.11.10 for fix to #48
+
 0.7.6 / 2020-12-15
 ==================
  * fix: propagate `virtuals: true` to subdocuments #47 #43
