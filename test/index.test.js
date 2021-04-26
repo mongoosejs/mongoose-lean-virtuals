@@ -287,7 +287,7 @@ describe('Nested schema virtuals work', function() {
     });
   });
 
-  it('can access parent doc (gh-40) (gh-41)', function() {
+  it('can access parent doc (gh-40) (gh-41) (gh-51)', function() {
     const childSchema = new mongoose.Schema({ firstName: String });
     childSchema.virtual('fullName').get(function() {
       if (this instanceof mongoose.Document) {
@@ -323,6 +323,29 @@ describe('Nested schema virtuals work', function() {
       assert.equal(doc.children[0].fullName, 'Luke Skywalker');
       assert.equal(doc.children[1], null);
       assert.equal(doc.children[2], 42);
+
+      doc = yield Model.find().lean({ virtuals: true }).then(res => res[0]);
+
+      assert.equal(doc.child.fullName, 'Luke Skywalker');
+      assert.equal(doc.children[0].fullName, 'Luke Skywalker');
+      assert.equal(doc.children[1], null);
+      assert.equal(doc.children[2], 42);
+
+      yield Model.create({
+        firstName: 'Han',
+        lastName: 'Solo',
+        child: { firstName: 'Anakin' },
+        children: [{ firstName: 'Anakin' }, null]
+      });
+      const docs = yield Model.find().sort({ lastName: -1 }).lean({ virtuals: true });
+      assert.equal(docs[0].child.fullName, 'Anakin Solo');
+      assert.equal(docs[0].children[0].fullName, 'Anakin Solo');
+      assert.equal(docs[0].children[1], null);
+
+      assert.equal(docs[1].child.fullName, 'Luke Skywalker');
+      assert.equal(docs[1].children[0].fullName, 'Luke Skywalker');
+      assert.equal(docs[1].children[1], null);
+      assert.equal(docs[1].children[2], 42);
     });
   });
 
