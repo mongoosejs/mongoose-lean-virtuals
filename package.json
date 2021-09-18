@@ -21,8 +21,8 @@
     "mongodb"
   ],
   "dependencies": {
-    "mpath": "0.5.x",
-    "array.prototype.flat": "1.2.3"
+    "array.prototype.flat": "1.2.3",
+    "mpath": "^0.8.4"
   },
   "devDependencies": {
     "acquit": "1.x",
@@ -32,7 +32,7 @@
     "eslint": "6.8.0",
     "istanbul": "0.4.5",
     "mocha": "5.2.x",
-    "mongoose": ">=5.11.10"
+    "mongoose": "^5.13.9"
   },
   "peerDependencies": {
     "mongoose": ">=5.11.10"
