@@ -1,3 +1,7 @@
+0.8.1 / 2021-09-18
+==================
+ * fix: upgrade to mpath ^0.8.4 to fix security warnings #54
+
 0.8.0 / 2021-04-26
 ==================
  * fix: handle calling `parent()` in virtual when using `find()` with multiple results #51
