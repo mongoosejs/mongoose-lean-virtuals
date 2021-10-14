@@ -192,12 +192,25 @@ function attachVirtualsToDoc(schema, doc, virtuals) {
     if (schema.virtuals[virtual] == null) {
       continue;
     }
+    const virtualType = schema.virtuals[virtual];
     const sp = Array.isArray(virtual) ? virtual : virtual.split('.');
     let cur = doc;
     for (let j = 0; j < sp.length - 1; ++j) {
       cur[sp[j]] = sp[j] in cur ? cur[sp[j]] : {};
       cur = cur[sp[j]];
     }
-    cur[sp[sp.length - 1]] = schema.virtuals[virtual].applyGetters(cur[sp[sp.length - 1]], doc);
+    let val = virtualType.applyGetters(cur[sp[sp.length - 1]], doc);
+    if (isPopulateVirtual(virtualType) && val === undefined) {
+      if (virtualType.options.justOne) {
+        val = null;
+      } else {
+        val = [];
+      }
+    }
+    cur[sp[sp.length - 1]] = val;
   }
+}
+
+function isPopulateVirtual(virtualType) {
+  return virtualType.options && (virtualType.options.ref || virtualType.options.refPath);
 }

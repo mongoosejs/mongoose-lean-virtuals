@@ -35,11 +35,7 @@ const getDocIdBySupportedOp = (op) => {
 
 before(function() {
   return co(function*() {
-    yield mongoose.connect('mongodb://localhost:27017/mongooseLeanVirtuals', {
-      useFindAndModify: false,
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
+    yield mongoose.connect('mongodb://localhost:27017/mongooseLeanVirtuals');
     yield mongoose.connection.dropDatabase();
 
     baseSchema = new mongoose.Schema({
@@ -672,6 +668,25 @@ describe('Discriminators work', () => {
         assert.equal(result.nested.test.a, 'Val');
         assert.equal(result.nested.test2.a, 'Val');
       });
+  });
+
+  it('sets empty array if no result and justOne: false', function() {
+    const childSchema = new mongoose.Schema({ name: String, parentId: 'ObjectId' });
+    const Child = mongoose.model('C2', childSchema);
+
+    const parentSchema = new mongoose.Schema({ name: String });
+    parentSchema.virtual('children', {
+      ref: 'C2',
+      localField: '_id',
+      foreignField: 'parentId'
+    });
+
+    parentSchema.plugin(mongooseLeanVirtuals);
+    const Parent = mongoose.model('P2', parentSchema);
+
+    return Parent.create({ name: 'Darth Vader' })
+      .then(() => Parent.findOne().populate('children').lean({ virtuals: true }))
+      .then(res => assert.deepEqual(res.children, []));
   });
 
   it('returns the same nested and referenced virtuals whether all virtuals selected or each specifically selected', function() {
