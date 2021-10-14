@@ -1,3 +1,7 @@
+0.9.0 / 2021-10-14
+==================
+ * fix: set populate virtuals to `null` or `[]` if no results based on `justOne` for Mongoose 6 Automattic/mongoose#10816
+
 0.8.1 / 2021-09-18
 ==================
  * fix: upgrade to mpath ^0.8.4 to fix security warnings #54
