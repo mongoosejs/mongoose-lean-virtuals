@@ -214,3 +214,6 @@ function attachVirtualsToDoc(schema, doc, virtuals) {
 function isPopulateVirtual(virtualType) {
   return virtualType.options && (virtualType.options.ref || virtualType.options.refPath);
 }
+
+module.exports.defaults = module.exports;
+module.exports.mongooseLeanVirtuals = module.exports;
