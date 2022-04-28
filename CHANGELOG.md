@@ -1,3 +1,7 @@
+0.9.1 / 2022-04-28
+==================
+ * fix(types): allow default import, named import, wildcard import #60 [IslandRhythms](https://github.com/IslandRhythms)
+
 0.9.0 / 2021-10-14
 ==================
  * fix: set populate virtuals to `null` or `[]` if no results based on `justOne` for Mongoose 6 Automattic/mongoose#10816
