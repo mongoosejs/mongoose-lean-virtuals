@@ -780,4 +780,71 @@ describe('Discriminators work', () => {
         assert.equal(doc.child.surname.uppercaseSurname, 'SKYWALKER');
       });
   });
+  it('should allow passing nested fields to virtuals options when trying to get a virtual on a populated virtual field (gh-57)', function() {
+    const fileSchema = new Schema(
+      {
+        id: { type: String, default: '' },
+        fileName: { type: String, default: '' },
+      },
+      { timestamps: true, versionKey: false, selectPopulatedPaths: false, toJSON: { virtuals: true }, toObject: { virtuals: true } }
+    );
+
+    fileSchema.index({ id: 1 });
+    fileSchema.index({ fileName: 1 });
+
+    const userSchema = new Schema(
+      {
+        id: { type: String, default: '' },
+        name: { type: String, default: '' },
+        avatarId: { type: String, default: '' },
+        referencedById: { type: String, default: '' },
+      },
+      { timestamps: true, versionKey: false, selectPopulatedPaths: false, toJSON: { virtuals: true }, toObject: { virtuals: true } }
+    );
+
+    userSchema.plugin(mongooseLeanVirtuals);
+
+    userSchema.virtual('referencedBy', { ref: 'users', localField: 'referencedById', foreignField: 'id', justOne: true });
+    userSchema.virtual('avatar', { ref: 'files', localField: 'avatarId', foreignField: 'id', justOne: true });
+
+    userSchema.virtual('virtualField').get(function() {
+      return 'some virtual id';
+    });
+    userSchema.virtual('virtualField2').get(function() {
+      return 'some virtual id2';
+    });
+
+    userSchema.index({ id: 1 });
+    userSchema.index({ referencedBy: 1 });
+
+    const UserModel = mongoose.model('users', userSchema, 'users');
+    const FileModel = mongoose.model('files', fileSchema, 'files');
+
+    const userIdOne = 'JmGvkmbTyPRIdzjny5r5i08k';
+    const userIdTwo = 'XRd8AEsA0kt9Lqcp6qkD57tf';
+
+    const fileIdOne = 'XRd8AEsA0kt9Lqcp6qkD57tf';
+    const fileIdTwo = 'XRd8AEsA0kt9Lqcp6qkD57tf';
+    return (co(function*() {
+      yield FileModel.create({ fileName: 'File one', id: fileIdOne });
+      yield FileModel.create({ fileName: 'File two', id: fileIdTwo });
+
+      yield UserModel.create({ name: 'User one', id: userIdOne, avatarId: fileIdOne });
+      yield UserModel.create({ name: 'User two', id: userIdTwo, avatarId: fileIdTwo, referencedById: userIdOne });
+
+      const userTwo = yield UserModel.findOne({ id: userIdTwo })
+        .select({ _id: 0, id: 1, name: 1, avatarId: 1, avatar: 1, referencedById: 1, referencedBy: 1 })
+        .populate([
+          { path: 'avatar', select: { _id: 0, id: 1, fileName: 1 } },
+          {
+            path: 'referencedBy',
+            options: {lean: {virtuals: ['virtualField']}},
+            select: { _id: 0, id: 1, name: 1, avatarId: 1, avatar: 1 },
+            populate: [{ path: 'avatar', select: { _id: 0, id: 1, fileName: 1 } }],
+          },
+        ]);
+      assert.ok(userTwo.referencedBy.virtualField);
+      assert.ok(!userTwo.referencedBy.virtualField2);
+    }));
+  });
 });

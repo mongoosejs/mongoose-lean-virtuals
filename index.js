@@ -33,13 +33,12 @@ module.exports.parent = function(obj) {
     return void 0;
   }
   return documentParentsMap.get(obj);
-}
+};
 
 function attachVirtualsMiddleware(schema) {
   return function(res) {
     if (this._mongooseOptions.lean && this._mongooseOptions.lean.virtuals) {
       let virtuals = this._mongooseOptions.lean.virtuals;
-
       if (Array.isArray(virtuals)) {
         const arr = virtuals;
         virtuals = [];
@@ -48,7 +47,6 @@ function attachVirtualsMiddleware(schema) {
           virtuals.push(arr[i].split('.'));
         }
       }
-
       attachVirtuals.call(this, schema, res, virtuals);
     }
   };
@@ -61,7 +59,6 @@ function attachVirtuals(schema, res, virtuals, parent) {
 
   let virtualsForChildren = virtuals;
   let toApply = null;
-
   if (Array.isArray(virtuals)) {
     virtualsForChildren = [];
     toApply = [];
@@ -152,7 +149,6 @@ function applyVirtualsToChildren(doc, schema, res, virtuals, parent) {
     attachVirtuals.call(doc, _schema, _doc, virtualsForChild, res);
     attachedVirtuals = true;
   }
-
   if (virtuals && virtuals.length && !attachedVirtuals) {
     attachVirtualsToDoc(schema, res, virtuals.map(function(virtual) {
       return virtual.join('.');
@@ -164,6 +160,7 @@ function attachVirtualsToDoc(schema, doc, virtuals) {
   if (doc == null || typeof doc !== 'object') {
     return;
   }
+
   if (Array.isArray(doc)) {
     for (let i = 0; i < doc.length; ++i) {
       attachVirtualsToDoc(schema, doc[i], virtuals);
