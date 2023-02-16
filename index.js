@@ -76,8 +76,8 @@ function attachVirtuals(schema, res, virtuals, parent) {
     }
   }
 
-  applyVirtualsToChildren(this, schema, res, virtualsForChildren, parent);
   addToParentMap(res, parent);
+  applyVirtualsToChildren(this, schema, res, virtualsForChildren, parent);
   return applyVirtualsToResult(schema, res, toApply);
 }
 

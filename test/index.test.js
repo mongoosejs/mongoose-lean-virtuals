@@ -283,13 +283,22 @@ describe('Nested schema virtuals work', function() {
     });
   });
 
-  it('can access parent doc (gh-40) (gh-41) (gh-51)', function() {
-    const childSchema = new mongoose.Schema({ firstName: String });
-    childSchema.virtual('fullName').get(function() {
-      if (this instanceof mongoose.Document) {
-        return `${this.firstName} ${this.parent().lastName}`;
+  it('can access parent doc (gh-40) (gh-41) (gh-51) (gh-65)', function() {
+    const getParent = (doc) => {
+      if (doc instanceof mongoose.Document) {
+        return doc.parent();
       }
-      return `${this.firstName} ${mongooseLeanVirtuals.parent(this).lastName}`;
+      return mongooseLeanVirtuals.parent(doc);
+    };
+
+    const subParentSchema = new mongoose.Schema({ lastName: String });
+    subParentSchema.virtual('fullName').get(function() {
+      return `${getParent(getParent(this)).firstName} ${this.lastName}`;
+    });
+
+    const childSchema = new mongoose.Schema({ firstName: String, parent: subParentSchema });
+    childSchema.virtual('fullName').get(function() {
+      return `${this.firstName} ${getParent(this).lastName}`;
     });
 
     const parentSchema = new mongoose.Schema({
@@ -307,7 +316,7 @@ describe('Nested schema virtuals work', function() {
         firstName: 'Anakin',
         lastName: 'Skywalker',
         child: { firstName: 'Luke' },
-        children: [{ firstName: 'Luke' }, null]
+        children: [{ firstName: 'Luke', parent: { lastName: 'Skywalker' } }, null]
       });
 
       yield Model.collection.updateOne({ _id: doc._id }, { $push: { children: 42 } });
@@ -317,6 +326,7 @@ describe('Nested schema virtuals work', function() {
 
       assert.equal(doc.child.fullName, 'Luke Skywalker');
       assert.equal(doc.children[0].fullName, 'Luke Skywalker');
+      assert.equal(doc.children[0].parent.fullName, 'Anakin Skywalker');
       assert.equal(doc.children[1], null);
       assert.equal(doc.children[2], 42);
 
@@ -324,6 +334,7 @@ describe('Nested schema virtuals work', function() {
 
       assert.equal(doc.child.fullName, 'Luke Skywalker');
       assert.equal(doc.children[0].fullName, 'Luke Skywalker');
+      assert.equal(doc.children[0].parent.fullName, 'Anakin Skywalker');
       assert.equal(doc.children[1], null);
       assert.equal(doc.children[2], 42);
 
