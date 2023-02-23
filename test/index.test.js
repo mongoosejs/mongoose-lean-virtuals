@@ -35,7 +35,7 @@ const getDocIdBySupportedOp = (op) => {
 
 before(function() {
   return co(function*() {
-    yield mongoose.connect('mongodb://localhost:27017/mongooseLeanVirtuals');
+    yield mongoose.connect('mongodb://127.0.0.1:27017/mongooseLeanVirtuals');
     yield mongoose.connection.dropDatabase();
 
     baseSchema = new mongoose.Schema({

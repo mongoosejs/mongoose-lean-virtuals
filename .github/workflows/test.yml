@@ -14,9 +14,6 @@ jobs:
         node: [14, 16, 18]
         os: [ubuntu-18.04, ubuntu-20.04]
         include:
-          - os: ubuntu-18.04
-            mongo-os: ubuntu1804
-            mongo: 4.0.2
           - os: ubuntu-20.04
             mongo-os: ubuntu2004
             mongo: 5.0.2
