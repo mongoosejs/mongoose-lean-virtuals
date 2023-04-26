@@ -5,8 +5,8 @@ const mpath = require('mpath');
 
 const documentParentsMap = new WeakMap();
 
-module.exports = function mongooseLeanVirtuals(schema) {
-  const fn = attachVirtualsMiddleware(schema);
+module.exports = function mongooseLeanVirtuals(schema, options) {
+  const fn = attachVirtualsMiddleware(schema, options);
   schema.pre('find', function() {
     if (typeof this.map === 'function') {
       this.map((res) => {
@@ -33,13 +33,13 @@ module.exports.parent = function(obj) {
     return void 0;
   }
   return documentParentsMap.get(obj);
-}
+};
 
-function attachVirtualsMiddleware(schema) {
+function attachVirtualsMiddleware(schema, options = {}) {
   return function(res) {
-    if (this._mongooseOptions.lean && this._mongooseOptions.lean.virtuals) {
-      let virtuals = this._mongooseOptions.lean.virtuals;
-
+    const statement = Object.keys(this._mongooseOptions).length ? this._mongooseOptions.lean && this._mongooseOptions.lean.virtuals || options.enabledByDefault : options.enabledByDefault;
+    if (statement) {
+      let virtuals = Object.keys(this._mongooseOptions).length ? this._mongooseOptions.lean.virtuals : true;
       if (Array.isArray(virtuals)) {
         const arr = virtuals;
         virtuals = [];

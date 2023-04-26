@@ -780,4 +780,21 @@ describe('Discriminators work', () => {
         assert.equal(doc.child.surname.uppercaseSurname, 'SKYWALKER');
       });
   });
+  describe('enabledByDefault', function() {
+    it('should attach virtuals if enabledByDefault is set asdf', function() {
+      const testSchema = new mongoose.Schema({
+        name: String
+      });
+      testSchema.virtual('lowercase').get(function() {
+        return this.name.toLowerCase();
+      });
+
+      testSchema.plugin(mongooseLeanVirtuals, { enabledByDefault: true });
+
+      const Test = mongoose.model('gh52', testSchema);
+      return Test.create({ name: 'TEST TESTERSON' }).then(() => Test.findOne().lean()).then(doc => {
+        assert.equal(doc.lowercase, 'test testerson');
+      });
+    });
+  });
 });
