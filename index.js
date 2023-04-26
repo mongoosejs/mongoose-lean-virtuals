@@ -37,8 +37,8 @@ module.exports.parent = function(obj) {
 
 function attachVirtualsMiddleware(schema, options = {}) {
   return function(res) {
-    const statement = Object.keys(this._mongooseOptions).length ? this._mongooseOptions.lean && this._mongooseOptions.lean.virtuals || options.enabledByDefault : options.enabledByDefault;
-    if (statement) {
+    const shouldApplyVirtuals = Object.keys(this._mongooseOptions).length ? this._mongooseOptions.lean && this._mongooseOptions.lean.virtuals || options.enabledByDefault : options.enabledByDefault;
+    if (shouldApplyVirtuals) {
       let virtuals = Object.keys(this._mongooseOptions).length ? this._mongooseOptions.lean.virtuals : true;
       if (Array.isArray(virtuals)) {
         const arr = virtuals;
