@@ -781,7 +781,7 @@ describe('Discriminators work', () => {
       });
   });
   describe('enabledByDefault', function() {
-    it('should attach virtuals if enabledByDefault is set asdf', function() {
+    it('should attach virtuals if enabledByDefault is set', function() {
       const testSchema = new mongoose.Schema({
         name: String
       });
