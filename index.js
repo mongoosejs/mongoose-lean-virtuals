@@ -4,6 +4,7 @@ const flat = require('array.prototype.flat');
 const mpath = require('mpath');
 
 const documentParentsMap = new WeakMap();
+const attachVirtualsFnMap = new WeakMap();
 
 module.exports = function mongooseLeanVirtuals(schema, options) {
   const fn = attachVirtualsMiddleware(schema, options);
@@ -32,7 +33,14 @@ module.exports.parent = function(obj) {
   if (obj == null) {
     return void 0;
   }
-  return documentParentsMap.get(obj);
+  const res = documentParentsMap.get(obj);
+  // Since we do we apply virtuals to children before parents,
+  // we may need to call `applyVirtuals()` on the parent if we're
+  // accessing the parent from the child.
+  if (attachVirtualsFnMap.get(res)) {
+    attachVirtualsFnMap.get(res)();
+  }
+  return res;
 };
 
 function attachVirtualsMiddleware(schema, options = {}) {
@@ -75,9 +83,19 @@ function attachVirtuals(schema, res, virtuals, parent) {
     }
   }
 
+  let called = false;
+  const applyVirtualsToResultOnce = () => {
+    if (called) {
+      return;
+    }
+    called = true;
+    applyVirtualsToResult(schema, res, toApply);
+  };
+
+  addToParentMap(res, parent, applyVirtualsToResultOnce);
+
   applyVirtualsToChildren(this, schema, res, virtualsForChildren, parent);
-  addToParentMap(res, parent);
-  return applyVirtualsToResult(schema, res, toApply);
+  return applyVirtualsToResultOnce();
 }
 
 function applyVirtualsToResult(schema, res, toApply) {
@@ -92,8 +110,8 @@ function applyVirtualsToResult(schema, res, toApply) {
   }
 }
 
-function addToParentMap(res, parent) {
-  if (parent == null || res == null) {
+function addToParentMap(res, parent, attachVirtualsToResult) {
+  if (res == null) {
     return;
   }
 
@@ -108,6 +126,7 @@ function addToParentMap(res, parent) {
     for (const _res of res) {
       if (_res != null && typeof _res === 'object') {
         documentParentsMap.set(_res, parent);
+        attachVirtualsFnMap.set(_res, attachVirtualsToResult);
       }
     }
     return;
@@ -115,6 +134,7 @@ function addToParentMap(res, parent) {
 
   if (typeof res === 'object') {
     documentParentsMap.set(res, parent);
+    attachVirtualsFnMap.set(res, attachVirtualsToResult);
   }
 }
 

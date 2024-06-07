@@ -623,7 +623,7 @@ describe('Discriminators work', () => {
 
   it('sets empty array if no result and justOne: false', async function() {
     const childSchema = new mongoose.Schema({ name: String, parentId: 'ObjectId' });
-    const Child = mongoose.model('C2', childSchema);
+    mongoose.model('C2', childSchema);
 
     const parentSchema = new mongoose.Schema({ name: String });
     parentSchema.virtual('children', {
@@ -688,7 +688,7 @@ describe('Discriminators work', () => {
     const Parent = mongoose.model('Parent2', parentSchema);
 
     const child = await Child.create({ name: 'Luke', surname: { name: 'Skywalker' } });
-    const parent = await Parent.create({ role: 'Father', surname: { name: 'Vader' }, allegiance: { name: 'Empire' }, child: child });
+    await Parent.create({ role: 'Father', surname: { name: 'Vader' }, allegiance: { name: 'Empire' }, child: child });
     let doc = await Parent.findOne().populate('child').lean({ virtuals: true });
     assert.ok(childGetterCalled);
     assert.ok(parentGetterCalled);
@@ -742,6 +742,50 @@ describe('Discriminators work', () => {
       await Test.create({ name: 'TEST TESTERSON' });
       const doc = await Test.findOne().lean();
       assert.equal(doc.lowercase, 'test testerson');
+    });
+  });
+
+  it('supports parent() on deeply nested docs (gh-65)', function() {
+    const getParent = (doc) => {
+      if (doc instanceof mongoose.Document) {
+        return doc.parent();
+      }
+      return mongooseLeanVirtuals.parent(doc);
+    };
+
+    const grandchildSchema = new mongoose.Schema({ firstName: String });
+    grandchildSchema.virtual('fullName').get(function() {
+      return `${this.firstName} ${getParent(getParent(this)).lastName}`;
+    });
+
+    const childSchema = new mongoose.Schema({ firstName: String, child: grandchildSchema });
+    childSchema.virtual('fullName').get(function() {
+      return `${this.firstName} ${getParent(this).lastName}`;
+    });
+
+    const parentSchema = new mongoose.Schema({
+      firstName: String,
+      lastName: String,
+      child: childSchema
+    }, { id: false });
+
+    parentSchema.plugin(mongooseLeanVirtuals);
+    const Parent = mongoose.model('gh65', parentSchema);
+
+    return co(function*() {
+      const { _id } = yield Parent.create({
+        firstName: 'Anakin',
+        lastName: 'Skywalker',
+        child: {
+          firstName: 'Luke',
+          child: {
+            firstName: 'Ben'
+          }
+        }
+      });
+      const doc = yield Parent.findById(_id).lean({ virtuals: true }).orFail();
+      assert.equal(doc.child.fullName, 'Luke Skywalker');
+      assert.equal(doc.child.child.fullName, 'Ben Skywalker');
     });
   });
 });
