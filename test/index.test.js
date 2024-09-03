@@ -1,7 +1,6 @@
 'use strict';
 
 const assert = require('assert');
-const co = require('co');
 const mongoose = require('mongoose');
 const mongooseLeanVirtuals = require('../');
 
@@ -623,7 +622,7 @@ describe('Discriminators work', () => {
 
   it('sets empty array if no result and justOne: false', async function() {
     const childSchema = new mongoose.Schema({ name: String, parentId: 'ObjectId' });
-    const Child = mongoose.model('C2', childSchema);
+    mongoose.model('C2', childSchema);
 
     const parentSchema = new mongoose.Schema({ name: String });
     parentSchema.virtual('children', {
@@ -688,7 +687,7 @@ describe('Discriminators work', () => {
     const Parent = mongoose.model('Parent2', parentSchema);
 
     const child = await Child.create({ name: 'Luke', surname: { name: 'Skywalker' } });
-    const parent = await Parent.create({ role: 'Father', surname: { name: 'Vader' }, allegiance: { name: 'Empire' }, child: child });
+    await Parent.create({ role: 'Father', surname: { name: 'Vader' }, allegiance: { name: 'Empire' }, child: child });
     let doc = await Parent.findOne().populate('child').lean({ virtuals: true });
     assert.ok(childGetterCalled);
     assert.ok(parentGetterCalled);
