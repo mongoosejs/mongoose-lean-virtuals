@@ -1,3 +1,10 @@
+1.0.0 / 2024-09-03
+==================
+ * BREAKING CHANGE: test on node v16+, drop support for Node v14
+ * BREAKING CHANGE: remove array.prototype.flat polyfill
+ * feat: add `enabledByDefault` option #68 #52
+ * fix: allow calling `parent()` on parent, allow accessing parent's virtual from child subdoc #73
+
 0.9.1 / 2022-04-28
 ==================
  * fix(types): allow default import, named import, wildcard import #60 [IslandRhythms](https://github.com/IslandRhythms)
