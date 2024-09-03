@@ -9,23 +9,18 @@ const Schema = mongoose.Schema;
 
 let baseDocId;
 let baseDocIdToDelete;
-let baseDocIdToRemove;
 let baseModel;
 let baseObj;
 let baseSchema;
 
 const createRemovableDocs = async () => {
   const baseDocToDelete = await baseModel.create(baseObj);
-  const baseDocToRemove = await baseModel.create(baseObj);
   baseDocIdToDelete = baseDocToDelete._id;
-  baseDocIdToRemove = baseDocToRemove._id;
 };
 
 const getDocIdBySupportedOp = (op) => {
   if (op === 'findOneAndDelete') {
     return baseDocIdToDelete;
-  } else if (op === 'findOneAndRemove') {
-    return baseDocIdToRemove;
   } else {
     return baseDocId;
   }
@@ -95,10 +90,6 @@ const supportedOps = {
   'findOneAndUpdate': function(model, docId, leanOptions) {
     leanOptions = leanOptions || defaultLeanOptions;
     return model.findOneAndUpdate({}, {}).lean(leanOptions).exec();
-  },
-  'findOneAndRemove': function(model, docId, leanOptions) {
-    leanOptions = leanOptions || defaultLeanOptions;
-    return model.findOneAndRemove({ _id: docId }).lean(leanOptions).exec();
   },
   'findOneAndDelete': function(model, docId, leanOptions) {
     leanOptions = leanOptions || defaultLeanOptions;
@@ -183,10 +174,8 @@ describe('Virtuals work with cursor', function() {
   });
 });
 
-// Skipping for now since this doesn't work.
 describe('Nested schema virtuals work', function() {
   let parentBaseDocId;
-  let parentDocIdToRemove;
   let parentDocIdToDelete;
   let parentModel;
 
@@ -202,25 +191,17 @@ describe('Nested schema virtuals work', function() {
       nested: baseObj,
       arr: [baseObj, baseObj],
     });
-    const parentDocToRemove = await parentModel.create({
-      nested: baseObj,
-      arr: [baseObj, baseObj],
-    });
     const parentDocToDelete = await parentModel.create({
       nested: baseObj,
       arr: [baseObj, baseObj],
     });
     parentBaseDocId = parentDoc._id;
-    parentDocIdToRemove = parentDocToRemove._id;
     parentDocIdToDelete = parentDocToDelete._id;
   });
 
   supportedOpsKeys.forEach(key => {
     it(`with ${key}`, async function() {
       let parentDocId = parentBaseDocId;
-      if (key === 'findOneAndRemove') {
-        parentDocId = parentDocIdToRemove;
-      }
       if (key === 'findOneAndDelete') {
         parentDocId = parentDocIdToDelete;
       }
@@ -430,6 +411,7 @@ describe('Discriminators work', () => {
     });
 
     childModel = baseModel.discriminator('childModel', childSchema);
+    await childModel.deleteMany({});
 
     const childDoc = await childModel.create({
       name: 'Val',
@@ -448,7 +430,7 @@ describe('Discriminators work', () => {
   });
 
   it('with find', async function() {
-    const docs = await childModel.find();
+    const docs = await childModel.find().lean({ virtuals: true });
     assert.ok(docs);
     docs.forEach((doc) => {
       assert.equal(doc.name, 'Val');
