@@ -743,4 +743,85 @@ describe('Discriminators work', () => {
       assert.equal(doc.lowercase, 'test testerson');
     });
   });
+
+  it('supports parent() on deeply nested docs (gh-65)', function() {
+    const getParent = (doc) => {
+      if (doc instanceof mongoose.Document) {
+        return doc.parent();
+      }
+      return mongooseLeanVirtuals.parent(doc);
+    };
+
+    const grandchildSchema = new mongoose.Schema({ firstName: String });
+    grandchildSchema.virtual('fullName').get(function() {
+      return `${this.firstName} ${getParent(getParent(this)).lastName}`;
+    });
+
+    const childSchema = new mongoose.Schema({ firstName: String, child: grandchildSchema });
+    childSchema.virtual('fullName').get(function() {
+      return `${this.firstName} ${getParent(this).lastName}`;
+    });
+
+    const parentSchema = new mongoose.Schema({
+      firstName: String,
+      lastName: String,
+      child: childSchema
+    }, { id: false });
+
+    parentSchema.plugin(mongooseLeanVirtuals);
+    const Parent = mongoose.model('gh65', parentSchema);
+
+    return co(function*() {
+      const { _id } = yield Parent.create({
+        firstName: 'Anakin',
+        lastName: 'Skywalker',
+        child: {
+          firstName: 'Luke',
+          child: {
+            firstName: 'Ben'
+          }
+        }
+      });
+      const doc = yield Parent.findById(_id).lean({ virtuals: true }).orFail();
+      assert.equal(doc.child.fullName, 'Luke Skywalker');
+      assert.equal(doc.child.child.fullName, 'Ben Skywalker');
+    });
+  });
+
+  it('can access parent virtuals from child subdocument (gh-64)', async function() {
+    const childSchema = new mongoose.Schema({ firstName: String });
+    childSchema.virtual('uri').get(function() {
+      // This `uri` virtual is in a subdocument, so in order to get the
+      // parent's `uri` you need to use this plugin's `parent()` function.
+  
+      const parent = this instanceof mongoose.Document
+        ? this.parent()
+        : mongooseLeanVirtuals.parent(this)
+      ;
+      return `${parent.uri}/child/gh-64-child`;
+    });
+  
+    const parentSchema = new mongoose.Schema({
+      child: childSchema
+    });
+    parentSchema.virtual('uri').get(function() {
+      return `/parent/gh-64-parent`;
+    });
+    
+    parentSchema.plugin(mongooseLeanVirtuals);
+    
+    const Parent = mongoose.model('gh64', parentSchema);
+    
+    const doc = { child: {} };
+  
+    await Parent.create(doc);
+  
+    let result = await Parent
+      .findOne()
+      .lean({ virtuals: true });
+    assert.equal(
+      result.child.uri,
+      '/parent/gh-64-parent/child/gh-64-child'
+    );  
+  });
 });

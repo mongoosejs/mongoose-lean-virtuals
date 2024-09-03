@@ -29,7 +29,7 @@
     "acquit-ignore": "0.1.0",
     "acquit-markdown": "0.1.0",
     "co": "4.6.0",
-    "eslint": "6.8.0",
+    "eslint": "7.x",
     "istanbul": "0.4.5",
     "mocha": "5.2.x",
     "mongoose": "7.0.0-rc0"
