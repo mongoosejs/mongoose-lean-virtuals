@@ -1,6 +1,5 @@
 'use strict';
 
-const flat = require('array.prototype.flat');
 const mpath = require('mpath');
 
 const documentParentsMap = new WeakMap();
@@ -148,7 +147,7 @@ function applyVirtualsToChildren(doc, schema, res, virtuals, parent) {
       continue;
     }
     const _doc = mpath.get(_path, res);
-    if (_doc == null || (Array.isArray(_doc) && flat(_doc, Infinity).length === 0)) {
+    if (_doc == null || (Array.isArray(_doc) && _doc.flat(Infinity).length === 0)) {
       continue;
     }
 
