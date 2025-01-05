@@ -25,3 +25,39 @@ userSchema.plugin(mongooseLeanVirtuals);
 // won't be in `res`
 const res = await UserModel.find().lean({ virtuals: true });
 ```
+
+# TypeScript
+
+Mongoose's `lean()` function typings don't know about `virtuals: true`, so you need to explicitly set the type when calling `lean()`.
+This module exports a convenient `VirtualsForModel` helper type that returns the virtual property types for a given model.
+The below example shows using `VirtualsForModel` along with `lean<TypeOverride>()`.
+
+```ts
+import mongooseLeanVirtuals, { VirtualsForModel } from "mongoose-lean-virtuals";
+
+interface ITest {
+  name: string
+}
+
+const testSchema = new mongoose.Schema(
+  { name: { type: String, required: true } },
+  {
+    virtuals: {
+      nameUpper: {
+        get() {
+          return this.name.toUpperCase();
+        }
+      }
+    }
+  }
+);
+
+testSchema.plugin(mongooseLeanVirtuals);
+
+const TestModel = mongoose.model('Test', testSchema);
+
+TestModel.findOne().lean<ITest & VirtualsForModel<typeof TestModel>>({ virtuals: true }).orFail().then(doc => {
+  const name: string = doc.name;
+  const nameUpper: string = doc.nameUpper;
+});
+```

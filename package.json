@@ -8,7 +8,8 @@
     "lint": "eslint .",
     "test": "mocha ./test/*.js",
     "test-integration": "mocha ./test/integration.js",
-    "test-travis": "istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec ./test/*"
+    "test-travis": "istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec ./test/*",
+    "test-typescript": "tsc --strict test/test.ts && rm ./test/test.js"
   },
   "repository": {
     "type": "git",
@@ -24,6 +25,7 @@
     "mpath": "^0.8.4"
   },
   "devDependencies": {
+    "@types/node": "22.10.5",
     "acquit": "1.x",
     "acquit-ignore": "0.1.0",
     "acquit-markdown": "0.1.0",
@@ -31,7 +33,8 @@
     "eslint": "7.x",
     "istanbul": "0.4.5",
     "mocha": "5.2.x",
-    "mongoose": "8.x"
+    "mongoose": "8.x",
+    "typescript": "5.x"
   },
   "peerDependencies": {
     "mongoose": ">=5.11.10"
