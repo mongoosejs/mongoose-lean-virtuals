@@ -1,3 +1,7 @@
+1.1.0 / 2025-01-04
+==================
+ * types: add VirtualsForModel helper to make it easier to set the correct type overrides for lean()
+
 1.0.0 / 2024-09-03
 ==================
  * BREAKING CHANGE: test on node v16+, drop support for Node v14
