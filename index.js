@@ -9,8 +9,9 @@ module.exports = function mongooseLeanVirtuals(schema, options) {
   const fn = attachVirtualsMiddleware(schema, options);
   schema.pre(['find', 'findOne', 'findOneAndUpdate', 'findOneAndDelete', 'findOneAndReplace'], function mongooseLeanVirtualsMiddleware() {
     const _this = this;
-    // Unshift makes this transform run before any other transforms (as well as before middleware because middleware runs after transforms).
-    // This is to make sure user-specified transforms don't give this transform an unexpected data structure - see gh-75.
+    // Unshift ensures this transform runs before any other transforms and middleware (middleware runs after transforms).
+    // This is crucial to ensure that virtuals are applied to the data structure first, preventing user-specified transforms
+    // from operating on an unexpected or incomplete data structure. See gh-75 for more details.
     this._transforms.unshift(function applyLeanVirtuals(res) {
       fn.call(_this, res);
       return res;
