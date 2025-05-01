@@ -95,6 +95,10 @@ const supportedOps = {
     leanOptions = leanOptions || defaultLeanOptions;
     return model.findOneAndDelete({ _id: docId }).lean(leanOptions).exec();
   },
+  'findOneAndReplace': function(model, docId, leanOptions) {
+    leanOptions = leanOptions || defaultLeanOptions;
+    return model.findOneAndReplace({ _id: docId }, { ...baseObj }).lean(leanOptions).exec();
+  }
 };
 const supportedOpsKeys = Object.keys(supportedOps);
 
@@ -776,35 +780,64 @@ describe('Discriminators work', () => {
     childSchema.virtual('uri').get(function() {
       // This `uri` virtual is in a subdocument, so in order to get the
       // parent's `uri` you need to use this plugin's `parent()` function.
-  
+
       const parent = this instanceof mongoose.Document
         ? this.parent()
         : mongooseLeanVirtuals.parent(this)
       ;
       return `${parent.uri}/child/gh-64-child`;
     });
-  
+
     const parentSchema = new mongoose.Schema({
       child: childSchema
     });
     parentSchema.virtual('uri').get(function() {
       return `/parent/gh-64-parent`;
     });
-    
+
     parentSchema.plugin(mongooseLeanVirtuals);
-    
+
     const Parent = mongoose.model('gh64', parentSchema);
-    
+
     const doc = { child: {} };
-  
+
     await Parent.create(doc);
-  
+
     let result = await Parent
       .findOne()
       .lean({ virtuals: true });
     assert.equal(
       result.child.uri,
       '/parent/gh-64-parent/child/gh-64-child'
-    );  
+    );
+  });
+
+  it('with transform (gh-75)', async function() {
+    const schema = new mongoose.Schema({ name: String });
+    schema.virtual('lower').get(function() {
+      return this.name.toLowerCase();
+    });
+
+    schema.plugin(mongooseLeanVirtuals);
+    const Model = mongoose.model('gh75', schema);
+
+    await Model.create([
+      { name: 'JOHN' },
+      { name: 'JANE' }
+    ]);
+
+    const docs = await Model.find().lean({ virtuals: true }).transform((docs) => {
+      const map = {};
+      docs.forEach(doc => {
+        map[doc._id.toString()] = doc;
+      });
+      return map;
+    });
+
+    assert.equal(Object.keys(docs).length, 2);
+    for (const id in docs) {
+      const doc = docs[id];
+      assert.equal(doc.name.toLowerCase(), doc.lower);
+    }
   });
 });
