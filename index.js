@@ -218,19 +218,8 @@ function attachVirtualsToDoc(schema, doc, virtuals) {
       cur = cur[sp[j]];
     }
     let val = virtualType.applyGetters(cur[sp[sp.length - 1]], doc);
-    if (isPopulateVirtual(virtualType) && val === undefined) {
-      if (virtualType.options.justOne) {
-        val = null;
-      } else {
-        val = [];
-      }
-    }
     cur[sp[sp.length - 1]] = val;
   }
-}
-
-function isPopulateVirtual(virtualType) {
-  return virtualType.options && (virtualType.options.ref || virtualType.options.refPath);
 }
 
 module.exports.defaults = module.exports;
