@@ -776,35 +776,126 @@ describe('Discriminators work', () => {
     childSchema.virtual('uri').get(function() {
       // This `uri` virtual is in a subdocument, so in order to get the
       // parent's `uri` you need to use this plugin's `parent()` function.
-  
+
       const parent = this instanceof mongoose.Document
         ? this.parent()
         : mongooseLeanVirtuals.parent(this)
       ;
       return `${parent.uri}/child/gh-64-child`;
     });
-  
+
     const parentSchema = new mongoose.Schema({
       child: childSchema
     });
     parentSchema.virtual('uri').get(function() {
       return `/parent/gh-64-parent`;
     });
-    
+
     parentSchema.plugin(mongooseLeanVirtuals);
-    
+
     const Parent = mongoose.model('gh64', parentSchema);
-    
+
     const doc = { child: {} };
-  
+
     await Parent.create(doc);
-  
+
     let result = await Parent
       .findOne()
       .lean({ virtuals: true });
     assert.equal(
       result.child.uri,
       '/parent/gh-64-parent/child/gh-64-child'
-    );  
+    );
+  });
+
+  it('populates empty array instead of undefined for empty virtuals with justOne: false (Automattic/mongoose#10816)', async function() {
+    const matchSchema = new mongoose.Schema({
+      timestamp: { type: Number }
+    });
+
+    matchSchema.virtual('predictions', {
+      ref: 'gh-67-Prediction',
+      localField: '_id',
+      foreignField: 'match_id',
+      justOne: false
+    });
+
+    matchSchema.plugin(mongooseLeanVirtuals);
+    const Match = mongoose.model('gh-67-Match', matchSchema);
+
+    const predictionSchema = new mongoose.Schema({
+      match_id: { type: mongoose.Schema.Types.ObjectId }
+    });
+
+    mongoose.model('gh-67-Prediction', predictionSchema);
+
+    const match = await Match.create({ timestamp: 1577836800000 });
+
+    const doc = await Match.findById(match._id)
+      .populate('predictions')
+      .lean({ virtuals: true });
+
+    // Should be an empty array, not undefined
+    assert.deepEqual(doc.predictions, []);
+  });
+
+  it('toObject() matches lean() for unpopulated virtuals (gh-79)', async function() {
+    const parentSchema = new mongoose.Schema({
+      firstName: String,
+      lastName: String,
+    });
+
+    parentSchema.virtual('children', {
+      foreignField: 'parentId',
+      justOne: false,
+      localField: '_id',
+      ref: 'gh-71-children',
+    });
+
+    parentSchema.plugin(mongooseLeanVirtuals);
+    const ParentModel = mongoose.model('gh-71-parents', parentSchema);
+
+    const childSchema = new mongoose.Schema({
+      firstName: String,
+      lastName: String,
+      nicknames: [String],
+      parentId: mongoose.Schema.Types.ObjectId,
+    });
+
+    childSchema.virtual('parent', {
+      foreignField: '_id',
+      justOne: true,
+      localField: 'parentId',
+      ref: 'gh-71-parents',
+    });
+
+    childSchema.plugin(mongooseLeanVirtuals);
+    const ChildModel = mongoose.model('gh-71-children', childSchema);
+
+    const parent = await ParentModel.create({
+      firstName: 'John',
+      lastName: 'Doe',
+    });
+
+    const child = await ChildModel.create({
+      firstName: 'Jane',
+      lastName: 'Doe',
+      // No parent id
+    });
+
+    const objParent = parent.toObject({ virtuals: true });
+    const leanParent = await ParentModel.findById(parent._id).lean({
+      virtuals: true,
+    });
+
+    const objChild = child.toObject({ virtuals: true });
+    const leanChild = await ChildModel.findById(child._id).lean({ virtuals: true });
+
+    // Should behave identically to toObject - virtual refs should be undefined
+    // when not populated, not [] or null
+    assert.strictEqual(objParent.children, undefined);
+    assert.strictEqual(leanParent.children, undefined);
+    assert.strictEqual(objChild.parent, undefined);
+    assert.strictEqual(leanChild.parent, undefined);
   });
 });
