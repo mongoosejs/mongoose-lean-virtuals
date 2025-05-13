@@ -1,3 +1,7 @@
+1.1.1 / 2025-05-13
+==================
+ * fix: avoid unnecessarily setting populate virtuals to `[]` if query didn't have populate() #80 #79
+
 1.1.0 / 2025-01-04
 ==================
  * types: add VirtualsForModel helper to make it easier to set the correct type overrides for lean()
