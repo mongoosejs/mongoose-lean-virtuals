@@ -835,8 +835,7 @@ describe('Discriminators work', () => {
     });
 
     assert.equal(Object.keys(docs).length, 2);
-    for (const id in docs) {
-      const doc = docs[id];
+    for (const [id, doc] of Object.entries(docs)) {
       assert.equal(doc.name.toLowerCase(), doc.lower);
     }
   });
