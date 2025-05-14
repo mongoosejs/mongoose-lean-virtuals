@@ -7,25 +7,16 @@ const attachVirtualsFnMap = new WeakMap();
 
 module.exports = function mongooseLeanVirtuals(schema, options) {
   const fn = attachVirtualsMiddleware(schema, options);
-  schema.pre('find', function() {
-    if (typeof this.map === 'function') {
-      this.map((res) => {
-        fn.call(this, res);
-        return res;
-      });
-    } else {
-      this.options.transform = (res) => {
-        fn.call(this, res);
-        return res;
-      };
-    }
+  schema.pre(['find', 'findOne', 'findOneAndUpdate', 'findOneAndDelete', 'findOneAndReplace'], function mongooseLeanVirtualsMiddleware() {
+    const _this = this;
+    // Unshift ensures this transform runs before any other transforms and middleware (middleware runs after transforms).
+    // This is crucial to ensure that virtuals are applied to the data structure first, preventing user-specified transforms
+    // from operating on an unexpected or incomplete data structure. See gh-75 for more details.
+    this._transforms.unshift(function applyLeanVirtuals(res) {
+      fn.call(_this, res);
+      return res;
+    });
   });
-
-  schema.post('find', fn);
-  schema.post('findOne', fn);
-  schema.post('findOneAndUpdate', fn);
-  schema.post('findOneAndRemove', fn);
-  schema.post('findOneAndDelete', fn);
 };
 
 module.exports.parent = function(obj) {
@@ -43,7 +34,7 @@ module.exports.parent = function(obj) {
 };
 
 function attachVirtualsMiddleware(schema, options = {}) {
-  return function(res) {
+  return function attachVirtualsToQueryResult(res) {
     let virtuals = this._mongooseOptions.lean && this._mongooseOptions.lean.virtuals != null ? this._mongooseOptions.lean.virtuals : options.enabledByDefault;
     if (virtuals) {
       if (Array.isArray(virtuals)) {

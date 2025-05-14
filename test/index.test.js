@@ -95,6 +95,10 @@ const supportedOps = {
     leanOptions = leanOptions || defaultLeanOptions;
     return model.findOneAndDelete({ _id: docId }).lean(leanOptions).exec();
   },
+  'findOneAndReplace': function(model, docId, leanOptions) {
+    leanOptions = leanOptions || defaultLeanOptions;
+    return model.findOneAndReplace({ _id: docId }, { ...baseObj }).lean(leanOptions).exec();
+  }
 };
 const supportedOpsKeys = Object.keys(supportedOps);
 
@@ -808,6 +812,34 @@ describe('Discriminators work', () => {
     );
   });
 
+  it('with transform (gh-75)', async function() {
+    const schema = new mongoose.Schema({ name: String });
+    schema.virtual('lower').get(function() {
+      return this.name.toLowerCase();
+    });
+
+    schema.plugin(mongooseLeanVirtuals);
+    const Model = mongoose.model('gh75', schema);
+
+    await Model.create([
+      { name: 'JOHN' },
+      { name: 'JANE' }
+    ]);
+
+    const docs = await Model.find().lean({ virtuals: true }).transform((docs) => {
+      const map = {};
+      docs.forEach(doc => {
+        map[doc._id.toString()] = doc;
+      });
+      return map;
+    });
+
+    assert.equal(Object.keys(docs).length, 2);
+    for (const [id, doc] of Object.entries(docs)) {
+      assert.equal(doc.name.toLowerCase(), doc.lower);
+    }
+  });
+    
   it('populates empty array instead of undefined for empty virtuals with justOne: false (Automattic/mongoose#10816)', async function() {
     const matchSchema = new mongoose.Schema({
       timestamp: { type: Number }
