@@ -1,3 +1,7 @@
+2.0.0 / 2025-03-14
+==================
+ * BREAKING CHANGE: rely on transforms over middleware to apply virtuals and add findOneAndReplace support #76 #75
+
 1.1.1 / 2025-05-13
 ==================
  * fix: avoid unnecessarily setting populate virtuals to `[]` if query didn't have populate() #80 #79
