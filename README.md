@@ -4,7 +4,13 @@ Attach virtuals to the results of mongoose queries when using [`.lean()`](https:
 
 [Read the docs here](http://plugins.mongoosejs.io/plugins/lean-virtuals).
 
-# Usage
+## Security contact information
+
+To report a security vulnerability, please use the
+[Tidelift security contact](https://tidelift.com/security).
+Tidelift will coordinate the fix and disclosure.
+
+## Usage
 
 ```javascript
 const mongooseLeanVirtuals = require('mongoose-lean-virtuals');
@@ -26,7 +32,7 @@ userSchema.plugin(mongooseLeanVirtuals);
 const res = await UserModel.find().lean({ virtuals: true });
 ```
 
-# TypeScript
+## TypeScript
 
 Mongoose's `lean()` function typings don't know about `virtuals: true`, so you need to explicitly set the type when calling `lean()`.
 This module exports a convenient `VirtualsForModel` helper type that returns the virtual property types for a given model.
