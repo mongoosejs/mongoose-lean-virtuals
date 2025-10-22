@@ -1,3 +1,7 @@
+2.0.1 / 2025-10-22
+==================
+ * chore: fix incorrect license definition in package.json #84 [virgilchiriac](https://github.com/virgilchiriac)
+
 2.0.0 / 2025-03-14
 ==================
  * BREAKING CHANGE: rely on transforms over middleware to apply virtuals and add findOneAndReplace support #76 #75
