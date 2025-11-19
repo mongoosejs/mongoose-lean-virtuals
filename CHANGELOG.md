@@ -1,3 +1,7 @@
+2.1.0 / 2025-11-18
+==================
+ * feat: support mongoose 9 and update github repo org to mongoosejs
+
 2.0.1 / 2025-10-22
 ==================
  * chore: fix incorrect license definition in package.json #84 [virgilchiriac](https://github.com/virgilchiriac)
