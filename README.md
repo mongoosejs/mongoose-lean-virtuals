@@ -32,6 +32,31 @@ userSchema.plugin(mongooseLeanVirtuals);
 const res = await UserModel.find().lean({ virtuals: true });
 ```
 
+## Populate Virtuals
+
+Suppose you have a [populate virtual](https://mongoosejs.com/docs/populate.html#populate-virtuals) as follows. 
+
+```javascript
+const userSchema = new mongoose.Schema({ name: String });
+
+userSchema.virtual('bestFriend', {
+  ref: 'User',
+  localField: 'friendId',
+  foreignField: '_id',
+  justOne: true
+});
+```
+
+You still need to call `populate()` to populate the `bestFriend` field, `lean({ virtuals: true })` will not populate it for you.
+
+```javascript 
+const doc1 = await User.findOne().lean({ virtuals: true });
+doc1.bestFriend; // undefined
+
+const doc2 = await User.findOne().populate('bestFriend').lean({ virtuals: true });
+doc2.bestFriend.name; // Works!
+```
+
 ## TypeScript
 
 Mongoose's `lean()` function typings don't know about `virtuals: true`, so you need to explicitly set the type when calling `lean()`.
